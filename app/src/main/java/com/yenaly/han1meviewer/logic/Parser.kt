@@ -330,6 +330,7 @@ object Parser {
             val playlistName = it.selectFirst("div > div > h4")?.text()
             val playlistScroll = it.getElementById("playlist-scroll")
             playlistScroll?.children()?.forEach { parent ->
+                if (parent.selectFirst(".load-more-related-link") != null) return@forEach
                 val videoCode = parent.selectFirst("div > a")?.absUrl("href")?.toVideoCode()
                     .throwIfParseNull(Parser::hanimeVideoVer2.name, "videoCode")
                 val cardMobilePanel = parent.selectFirst("div[class^=card-mobile-panel]")
