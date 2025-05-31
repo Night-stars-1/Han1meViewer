@@ -68,7 +68,6 @@ class ExoMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd), Player.Listener, HMed
      */
     private val exoPlayer get() = _exoPlayer!!
 
-    private var callback: Runnable? = null
     private var prevSeek = 0L
 
     @OptIn(UnstableApi::class)
@@ -77,77 +76,72 @@ class ExoMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd), Player.Listener, HMed
         val context = jzvd.context
 
         release()
-        mMediaHandlerThread = HandlerThread("JZVD")
-        mMediaHandlerThread.start()
-        mMediaHandler = Handler(mMediaHandlerThread.looper)
-        handler = Handler(Looper.getMainLooper())
-        mMediaHandler?.post {
-            val videoTrackSelectionFactory = AdaptiveTrackSelection.Factory()
-            val trackSelector = DefaultTrackSelector(context, videoTrackSelectionFactory)
+//        mMediaHandlerThread = HandlerThread("JZVD")
+//        mMediaHandlerThread.start()
+//        mMediaHandler = Handler(mMediaHandlerThread.looper)
+//        handler = Handler(Looper.getMainLooper())
 
-            val loadControl: LoadControl = DefaultLoadControl.Builder()
-                // .setBufferDurationsMs(360000, 600000, 1000, 5000)
-                // .setPrioritizeTimeOverSizeThresholds(false)
-                // .setTargetBufferBytes(C.LENGTH_UNSET)
-                .build()
+        val videoTrackSelectionFactory = AdaptiveTrackSelection.Factory()
+        val trackSelector = DefaultTrackSelector(context, videoTrackSelectionFactory)
+
+        val loadControl: LoadControl = DefaultLoadControl.Builder()
+            // .setBufferDurationsMs(360000, 600000, 1000, 5000)
+            // .setPrioritizeTimeOverSizeThresholds(false)
+            // .setTargetBufferBytes(C.LENGTH_UNSET)
+            .build()
 
 
-            val bandwidthMeter = DefaultBandwidthMeter.Builder(context).build()
-            // 2. Create the player
-            val renderersFactory = DefaultRenderersFactory(context)
-            _exoPlayer = ExoPlayer.Builder(context, renderersFactory)
-                .setTrackSelector(trackSelector)
-                .setLoadControl(loadControl)
-                .setBandwidthMeter(bandwidthMeter)
-                .build()
-            // Produces DataSource instances through which media data is loaded.
-            val dataSourceFactory = DefaultDataSource.Factory(
-                context,
-                DefaultHttpDataSource.Factory()
-                    .setDefaultRequestProperties(jzvd.jzDataSource.headerMap)
-            )
+        val bandwidthMeter = DefaultBandwidthMeter.Builder(context).build()
+        // 2. Create the player
+        val renderersFactory = DefaultRenderersFactory(context)
+        _exoPlayer = ExoPlayer.Builder(context, renderersFactory)
+            .setTrackSelector(trackSelector)
+            .setLoadControl(loadControl)
+            .setBandwidthMeter(bandwidthMeter)
+            .build()
+        // Produces DataSource instances through which media data is loaded.
+        val dataSourceFactory = DefaultDataSource.Factory(
+            context,
+            DefaultHttpDataSource.Factory()
+                .setDefaultRequestProperties(jzvd.jzDataSource.headerMap)
+        )
 
-            val currUrl = jzvd.jzDataSource.currentUrl.toString()
-            val videoSource = if (currUrl.contains(".m3u8")) {
-                HlsMediaSource.Factory(dataSourceFactory)
-                    .createMediaSource(MediaItem.fromUri(currUrl))
-            } else {
-                ProgressiveMediaSource.Factory(dataSourceFactory)
-                    .createMediaSource(MediaItem.fromUri(currUrl))
-            }
-
-            Log.e(TAG, "URL Link = $currUrl")
-
-            exoPlayer.addListener(this)
-
-            val isLoop = jzvd.jzDataSource.looping
-            if (isLoop) {
-                exoPlayer.repeatMode = Player.REPEAT_MODE_ONE
-            } else {
-                exoPlayer.repeatMode = Player.REPEAT_MODE_OFF
-            }
-            exoPlayer.setMediaSource(videoSource)
-            exoPlayer.prepare()
-            exoPlayer.playWhenReady = true
-            callback = OnBufferingUpdate()
-
-            val surfaceTexture = jzvd.textureView?.surfaceTexture
-            surfaceTexture?.let { exoPlayer.setVideoSurface(Surface(it)) }
+        val currUrl = jzvd.jzDataSource.currentUrl.toString()
+        val videoSource = if (currUrl.contains(".m3u8")) {
+            HlsMediaSource.Factory(dataSourceFactory)
+                .createMediaSource(MediaItem.fromUri(currUrl))
+        } else {
+            ProgressiveMediaSource.Factory(dataSourceFactory)
+                .createMediaSource(MediaItem.fromUri(currUrl))
         }
+
+        Log.e(TAG, "URL Link = $currUrl")
+
+        exoPlayer.addListener(this)
+
+        val isLoop = jzvd.jzDataSource.looping
+        if (isLoop) {
+            exoPlayer.repeatMode = Player.REPEAT_MODE_ONE
+        } else {
+            exoPlayer.repeatMode = Player.REPEAT_MODE_OFF
+        }
+        exoPlayer.setMediaSource(videoSource)
+        exoPlayer.prepare()
+        exoPlayer.playWhenReady = true
+
+        val surfaceTexture = jzvd.textureView?.surfaceTexture
+        surfaceTexture?.let { exoPlayer.setVideoSurface(Surface(it)) }
+
     }
 
     override fun start() {
-        mMediaHandler?.post {
-            _exoPlayer?.playWhenReady = true
-        }
+        _exoPlayer?.playWhenReady = true
     }
 
     override fun onVideoSizeChanged(videoSize: VideoSize) {
         val realWidth = videoSize.width * videoSize.pixelWidthHeightRatio
         val realHeight = videoSize.height
-        handler.post {
-            jzvd.onVideoSizeChanged(realWidth.toInt(), realHeight)
-        }
+        jzvd.onVideoSizeChanged(realWidth.toInt(), realHeight)
         val ratio = realWidth / realHeight // > 1 橫屏， < 1 竖屏
         if (ratio > 1) {
             Jzvd.FULLSCREEN_ORIENTATION = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
@@ -161,9 +155,7 @@ class ExoMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd), Player.Listener, HMed
     }
 
     override fun pause() {
-        mMediaHandler?.post {
-            _exoPlayer?.playWhenReady = false
-        }
+        _exoPlayer?.playWhenReady = false
     }
 
     override fun isPlaying(): Boolean {
@@ -171,30 +163,26 @@ class ExoMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd), Player.Listener, HMed
     }
 
     override fun seekTo(time: Long) {
-        mMediaHandler?.post {
-            if (time != prevSeek) {
-                _exoPlayer?.let { exoPlayer ->
-                    if (time >= exoPlayer.bufferedPosition) {
-                        jzvd.onStatePreparingPlaying()
-                    }
-                    exoPlayer.seekTo(time)
-                    prevSeek = time
-                    jzvd.seekToInAdvance = time
+        if (time != prevSeek) {
+            _exoPlayer?.let { exoPlayer ->
+                if (time >= exoPlayer.bufferedPosition) {
+                    jzvd.onStatePreparingPlaying()
                 }
+                exoPlayer.seekTo(time)
+                prevSeek = time
+                jzvd.seekToInAdvance = time
             }
         }
     }
 
     override fun release() {
-        if (mMediaHandler != null && mMediaHandlerThread != null && _exoPlayer != null) { //不知道有没有妖孽
-            val tmpHandlerThread = mMediaHandlerThread
+        if (_exoPlayer != null) { //不知道有没有妖孽
+//            val tmpHandlerThread = mMediaHandlerThread
             val tmpMediaPlayer = exoPlayer
             SAVED_SURFACE = null
-            mMediaHandler?.post {
-                tmpMediaPlayer.release() //release就不能放到主线程里，界面会卡顿
-                tmpHandlerThread.quit()
-                _exoPlayer = null
-            }
+            tmpMediaPlayer.release() //release就不能放到主线程里，界面会卡顿
+//            tmpHandlerThread.quit()
+            _exoPlayer = null
         }
     }
 
@@ -207,16 +195,12 @@ class ExoMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd), Player.Listener, HMed
     }
 
     override fun setVolume(leftVolume: Float, rightVolume: Float) {
-        mMediaHandler?.post {
-            _exoPlayer?.volume = (leftVolume + rightVolume) / 2
-        }
+        _exoPlayer?.volume = (leftVolume + rightVolume) / 2
     }
 
     override fun setSpeed(speed: Float) {
-        mMediaHandler?.post {
-            val playbackParams = PlaybackParameters(speed, 1.0F)
-            _exoPlayer?.playbackParameters = playbackParams
-        }
+        val playbackParams = PlaybackParameters(speed, 1.0F)
+        _exoPlayer?.playbackParameters = playbackParams
     }
 
     override fun onTimelineChanged(timeline: Timeline, reason: Int) {
@@ -229,38 +213,34 @@ class ExoMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd), Player.Listener, HMed
 
     override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
         if (playWhenReady && _exoPlayer?.playbackState == Player.STATE_READY) {
-            handler?.post {
-                jzvd.onStatePlaying()
-            }
+            jzvd.onStatePlaying()
         }
     }
 
     override fun onPlaybackStateChanged(playbackState: Int) {
-        handler?.post {
-            when (playbackState) {
-                Player.STATE_BUFFERING -> {
-                    jzvd.onStatePreparingPlaying()
-                    callback?.let(handler::post)
-                }
+        when (playbackState) {
+            Player.STATE_BUFFERING -> {
+                jzvd.onStatePreparingPlaying()
+                onBufferingUpdate()
+            }
 
-                Player.STATE_READY -> {
-                    jzvd.onStatePlaying()
-                }
+            Player.STATE_READY -> {
+                jzvd.onStatePlaying()
+            }
 
-                Player.STATE_ENDED -> {
-                    jzvd.onCompletion()
-                }
+            Player.STATE_ENDED -> {
+                jzvd.onCompletion()
+            }
 
-                else -> {
-                    Log.e(TAG, "onPlaybackStateChanged: $playbackState")
-                }
+            else -> {
+                Log.e(TAG, "onPlaybackStateChanged: $playbackState")
             }
         }
     }
 
     override fun onPlayerError(error: PlaybackException) {
         Log.e(TAG, "onPlayerError: $error")
-        handler?.post { jzvd.onError(1000, 1000) }
+        mMediaHandler?.post { jzvd.onError(1000, 1000) }
     }
 
     override fun onPositionDiscontinuity(
@@ -269,7 +249,7 @@ class ExoMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd), Player.Listener, HMed
         reason: Int,
     ) {
         if (reason == Player.DISCONTINUITY_REASON_SEEK) {
-            handler?.post { jzvd.onSeekComplete() }
+            jzvd.onSeekComplete()
         }
     }
 
@@ -293,21 +273,16 @@ class ExoMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd), Player.Listener, HMed
     override fun onSurfaceTextureUpdated(surface: SurfaceTexture) = Unit
 
 
-    private inner class OnBufferingUpdate : Runnable {
-        override fun run() {
-            _exoPlayer?.bufferedPercentage?.let { per ->
-                handler.post {
-                    jzvd.setBufferProgress(per)
-                }
-                if (per < 100) {
-                    handler.postDelayed(this, 300)
-                } else {
-                    handler.removeCallbacks(this)
-                }
-                return
-            }
-            handler.removeCallbacks(this)
+    private fun onBufferingUpdate() {
+        _exoPlayer?.bufferedPercentage?.let { per ->
+            jzvd.setBufferProgress(per)
+//                if (per < 100) {
+//                    mMediaHandler.postDelayed(this, 300)
+//                } else {
+//                    mMediaHandler.removeCallbacks(this)
+//                }
         }
+//            mMediaHandler.removeCallbacks(this)
     }
 }
 
