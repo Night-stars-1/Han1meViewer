@@ -301,7 +301,7 @@ object Parser {
         tags.forEach { tag ->
             val child = tag.childOrNull(0)
             if (child != null && child.hasAttr("href")) {
-                tagList.add(child.text())
+                tagList.add(child.ownText())
             }
         }
 
