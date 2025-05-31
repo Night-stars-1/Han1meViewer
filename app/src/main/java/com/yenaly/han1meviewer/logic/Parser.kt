@@ -339,7 +339,7 @@ object Parser {
                     ?.firstOrNull()
                     ?.text()
                     ?.contains("播放") == true
-                val cardMobileDuration = cardMobilePanel?.select("div[class=card-mobile-duration]")
+                val cardMobileDuration = cardMobilePanel?.select("div.card-mobile-duration")
                 val eachDuration = cardMobileDuration?.firstOrNull()?.text()
                 val eachViews = cardMobileDuration?.getOrNull(1)?.text()
                     ?.substringBefore("次")
