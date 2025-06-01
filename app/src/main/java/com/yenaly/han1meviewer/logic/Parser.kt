@@ -204,7 +204,7 @@ object Parser {
         if (title == null || coverUrl == null || videoCode == null) return null
         val durationAndViews = hanimeSearchItem.select("div.card-mobile-duration")
         val mDuration = durationAndViews.getOrNull(0)?.text() // 改了
-        val views = durationAndViews.getOrNull(1)?.text() // 改了
+        val views = durationAndViews.getOrNull(2)?.text() // 改了
         return HanimeInfo(
             title = title,
             coverUrl = coverUrl,
@@ -341,7 +341,7 @@ object Parser {
                     ?.contains("播放") == true
                 val cardMobileDuration = cardMobilePanel?.select("div.card-mobile-duration")
                 val eachDuration = cardMobileDuration?.firstOrNull()?.text()
-                val eachViews = cardMobileDuration?.getOrNull(1)?.text()
+                val eachViews = cardMobileDuration?.getOrNull(2)?.text()
                     ?.substringBefore("次")
                 val playlistEachCoverUrl = eachTitleCover?.absUrl("src")
                     .throwIfParseNull(Parser::hanimeVideoVer2.name, "playlistEachCoverUrl")
