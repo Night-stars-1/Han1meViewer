@@ -98,7 +98,7 @@ val HANIME_LOGIN_URL = HANIME_BASE_URL + "login"
 
 // github url
 
-const val HA1_GITHUB_URL = "https://github.com/YenalyLiew/Han1meViewer"
+const val HA1_GITHUB_URL = "https://github.com/Night-stars-1/Han1meViewer"
 
 const val HA1_GITHUB_ISSUE_URL = "$HA1_GITHUB_URL/issues"
 
@@ -106,7 +106,7 @@ const val HA1_GITHUB_FORUM_URL = "$HA1_GITHUB_URL/discussions"
 
 const val HA1_GITHUB_RELEASES_URL = "$HA1_GITHUB_URL/releases"
 
-const val HA1_GITHUB_API_URL = "https://api.github.com/repos/YenalyLiew/Han1meViewer/"
+const val HA1_GITHUB_API_URL = "https://api.github.com/repos/Night-stars-1/Han1meViewer"
 
 // for Shared Preference
 

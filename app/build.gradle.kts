@@ -35,7 +35,7 @@ android {
     val signConfig = if (isRelease) signingConfigs.create("release") {
         storeFile = File(projectDir, "keystore/Han1meViewerKeystore.jks").checkIfExists()
         storePassword = signPwd
-        keyAlias = "yenaly"
+        keyAlias = "night_star"
         keyPassword = signPwd
         enableV3Signing = true
         enableV4Signing = true
