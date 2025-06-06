@@ -106,7 +106,7 @@ const val HA1_GITHUB_FORUM_URL = "$HA1_GITHUB_URL/discussions"
 
 const val HA1_GITHUB_RELEASES_URL = "$HA1_GITHUB_URL/releases"
 
-const val HA1_GITHUB_API_URL = "https://api.github.com/repos/Night-stars-1/Han1meViewer"
+const val HA1_GITHUB_API_URL = "https://api.github.com/repos/Night-stars-1/Han1meViewer/"
 
 // for Shared Preference
 
