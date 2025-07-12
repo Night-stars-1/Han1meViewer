@@ -5,6 +5,8 @@ on:
     branches: [ "master" ]
     paths-ignore:
       - "**.md"
+    tags:
+      - "v*.*.*"
   workflow_dispatch:
 
 jobs:
@@ -43,3 +45,32 @@ jobs:
         with:
           name: app-release-${{ github.sha }}
           path: app/build/outputs/apk/release/Han1meViewer-v*.apk
+
+      - name: Create release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2.0.4
+        with:
+          name: Han1meViewer ${{ github.ref_name }}
+          files: app/build/outputs/apk/release/Han1meViewer-v*.apk
+
+  changelog:
+    name: Generate Changelog
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: windows-latest
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.1.1
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Generate Changelog
+        id: generate_changelog
+        uses: Night-stars-1/changelog-generator-action@main
+
+      - name: Update Changelog
+        uses: softprops/action-gh-release@v2.0.4
+        with:
+          body: ${{ steps.generate_changelog.outputs.changelog }}
+          make_latest: true
