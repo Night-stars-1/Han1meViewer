@@ -367,5 +367,6 @@
     <string name="no_limit">無限制</string>
     <string name="check_video_exists_in_download">我注意到你好像下載過畫質為 %s 的該影片</string>
     <string name="retry">重試</string>
+    <string name="super_resolution">超分辨率</string>
 
 </resources>

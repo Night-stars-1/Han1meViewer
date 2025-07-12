@@ -171,6 +171,9 @@ dependencies {
     implementation(libs.firebase.perf)
     implementation(libs.firebase.config)
 
+    // mpv
+    implementation(libs.mpv.lib)
+
     ksp(libs.room.compiler)
 
     coreLibraryDesugaring(libs.desugar.jdk.libs)

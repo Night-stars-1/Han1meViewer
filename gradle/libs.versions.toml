@@ -65,6 +65,7 @@ asynclayoutinflater = "1.0.0"
 flexbox = "3.0.0"
 firebaseBom = "33.10.0"
 composeBom = "2025.02.00"
+mpv = "v0.1.4"
 
 [libraries]
 # Android
@@ -159,6 +160,8 @@ firebase-perf = { group = "com.google.firebase", name = "firebase-perf" }
 firebase-config = { group = "com.google.firebase", name = "firebase-config" }
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 
+# mpv
+mpv-lib = { group = "com.github.abdallahmehiz", name = "mpv-android", version.ref = "mpv" }
 [bundles]
 
 android-base = [

@@ -5,10 +5,10 @@ import android.graphics.SurfaceTexture
 import android.media.MediaPlayer
 import android.media.PlaybackParams
 import android.os.Handler
-import android.os.HandlerThread
 import android.os.Looper
 import android.util.Log
 import android.view.Surface
+import android.view.TextureView
 import androidx.annotation.OptIn
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
@@ -31,6 +31,9 @@ import androidx.media3.exoplayer.upstream.DefaultBandwidthMeter
 import cn.jzvd.JZMediaInterface
 import cn.jzvd.JZMediaSystem
 import cn.jzvd.Jzvd
+import com.yenaly.han1meviewer.BuildConfig
+import com.yenaly.han1meviewer.util.AnimeShaders
+import `is`.xyz.mpv.MPVLib
 import kotlin.math.absoluteValue
 
 
@@ -42,13 +45,15 @@ import kotlin.math.absoluteValue
 sealed interface HMediaKernel {
     enum class Type(val clazz: Class<out JZMediaInterface>) {
         MediaPlayer(SystemMediaKernel::class.java),
-        ExoPlayer(ExoMediaKernel::class.java);
+        ExoPlayer(ExoMediaKernel::class.java),
+        MpvPlayer(MpvMediaKernel::class.java);
 
         companion object {
             fun fromString(name: String): Type {
                 return when (name) {
                     MediaPlayer.name -> MediaPlayer
                     ExoPlayer.name -> ExoPlayer
+                    MpvPlayer.name -> MpvPlayer
                     else -> ExoPlayer
                 }
             }
@@ -254,10 +259,12 @@ class ExoMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd), Player.Listener, HMed
     }
 
     override fun setSurface(surface: Surface?) {
+        Log.e(TAG, "setSurface: ", )
         _exoPlayer?.setVideoSurface(surface)
     }
 
     override fun onSurfaceTextureAvailable(surface: SurfaceTexture, width: Int, height: Int) {
+        Log.d(TAG, "onSurfaceTextureAvailable: $SAVED_SURFACE $width $height")
         if (SAVED_SURFACE == null) {
             SAVED_SURFACE = surface
             prepare()
@@ -327,5 +334,178 @@ class SystemMediaKernel(jzvd: Jzvd) : JZMediaSystem(jzvd), HMediaKernel {
     // 有些机器到这里可能会报空指针异常，所以加了个判断，但是不知道为什么会报空指针异常
     override fun isPlaying(): Boolean {
         return mediaPlayer?.isPlaying == true
+    }
+}
+
+class MpvMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd) {
+    companion object {
+        const val TAG = "MpvMediaKernel"
+    }
+
+    fun init() {
+
+        MPVLib.addObserver(mpvEventObserver)
+
+        MPVLib.setOptionString("vo", "gpu")
+        MPVLib.setOptionString("profile", "fast")
+        MPVLib.setOptionString("hwdec", "auto")
+        MPVLib.setOptionString("msg-level", "all=" + if (BuildConfig.DEBUG) "v" else "warn")
+
+        MPVLib.observeProperty("time-pos", MPVLib.mpvFormat.MPV_FORMAT_DOUBLE)
+        MPVLib.observeProperty("duration", MPVLib.mpvFormat.MPV_FORMAT_DOUBLE)
+        MPVLib.observeProperty("pause", MPVLib.mpvFormat.MPV_FORMAT_FLAG)
+        MPVLib.observeProperty("playback-active", MPVLib.mpvFormat.MPV_FORMAT_FLAG)
+        MPVLib.observeProperty("video-params/w", MPVLib.mpvFormat.MPV_FORMAT_INT64)
+        MPVLib.observeProperty("video-params/h", MPVLib.mpvFormat.MPV_FORMAT_INT64)
+    }
+
+    override fun prepare() {
+        init()
+        handler = Handler(Looper.getMainLooper())
+
+        val url = jzvd.jzDataSource.currentUrl.toString()
+        if (url.isEmpty()) {
+            Log.e(TAG, "视频链接为空")
+            return
+        }
+
+        Log.e(TAG, "URL Link = $url")
+        MPVLib.setOptionString("force-window", "yes")
+        MPVLib.command(arrayOf("loadfile", url))
+
+        val surfaceTexture = jzvd.textureView?.surfaceTexture
+        surfaceTexture?.let { MPVLib.attachSurface(Surface(it)) }
+    }
+
+    override fun start() {
+        MPVLib.setPropertyBoolean("pause", false)
+    }
+
+    override fun pause() {
+        MPVLib.setPropertyBoolean("pause", true)
+    }
+
+    override fun isPlaying(): Boolean {
+        val playbackActive = MPVLib.getPropertyBoolean("playback-active")
+        val isPlaying = playbackActive ?: false
+        return isPlaying
+    }
+
+    override fun seekTo(time: Long) {
+        MPVLib.command(arrayOf("seek", (time / 1000.0).toString(), "absolute"))
+    }
+
+    override fun release() {
+        clearSuperResolution()
+        MPVLib.setPropertyBoolean("pause", true)
+        MPVLib.command(arrayOf("loadfile", "", "replace"))
+        MPVLib.setPropertyString("vo", "null")
+        MPVLib.setOptionString("force-window", "no")
+        MPVLib.detachSurface()
+        MPVLib.removeObserver(mpvEventObserver)
+        SAVED_SURFACE = null
+    }
+
+    override fun getCurrentPosition(): Long {
+        val timePosSeconds = MPVLib.getPropertyDouble("time-pos")
+        return (timePosSeconds ?: 0.0).toLong() * 1000
+    }
+
+    override fun getDuration(): Long {
+        val durationSeconds = MPVLib.getPropertyDouble("duration")
+        return (durationSeconds ?: 0.0).toLong() * 1000
+    }
+
+    override fun setVolume(leftVolume: Float, rightVolume: Float) {
+        val volume = (leftVolume + rightVolume) / 2 * 100
+        MPVLib.setPropertyDouble("volume", volume.toDouble())
+    }
+
+    override fun setSpeed(speed: Float) {
+        MPVLib.setPropertyDouble("speed", speed.toDouble())
+    }
+
+    override fun setSurface(surface: Surface?) {
+        MPVLib.attachSurface(surface)
+    }
+
+    override fun onSurfaceTextureAvailable(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
+        if (SAVED_SURFACE == null) {
+            SAVED_SURFACE = surfaceTexture
+            prepare()
+        } else {
+            jzvd.textureView.setSurfaceTexture(SAVED_SURFACE)
+        }
+    }
+
+    override fun onSurfaceTextureSizeChanged(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
+        MPVLib.setPropertyString("android-surface-size", "${width}x$height")
+    }
+
+    override fun onSurfaceTextureDestroyed(surfaceTexture: SurfaceTexture): Boolean {
+        return false
+    }
+
+    override fun onSurfaceTextureUpdated(surfaceTexture: SurfaceTexture) {}
+
+
+    fun clearSuperResolution() {
+        MPVLib.command(arrayOf("change-list", "glsl-shaders", "clr", ""))
+    }
+    fun setSuperResolution(index: Int) {
+        if (index != 0) {
+            val cmd = arrayOf("change-list", "glsl-shaders", "set", AnimeShaders.getShader(jzvd.context, index))
+            MPVLib.command(cmd)
+        } else {
+            clearSuperResolution()
+        }
+    }
+
+    private val mpvEventObserver = object : MPVLib.EventObserver {
+        override fun eventProperty(property: String) {
+//            Log.d(TAG, "eventProperty: $property")
+        }
+
+        override fun eventProperty(property: String, value: Long) {
+
+        }
+
+        override fun eventProperty(property: String, value: Boolean) {
+//            Log.d(TAG, "eventProperty: $property $value")
+        }
+
+        override fun eventProperty(property: String, value: String) {
+//            Log.d(TAG, "eventProperty: $property $value")
+        }
+
+        override fun eventProperty(property: String, value: Double) {
+//            Log.d(TAG, "eventProperty: $property $value")
+        }
+
+        override fun event(eventId: Int) {
+            handler.post {
+                when (eventId) {
+                    MPVLib.mpvEventId.MPV_EVENT_START_FILE -> {
+                        // 文件开始加载
+                        jzvd.onStatePreparing()
+                    }
+                    MPVLib.mpvEventId.MPV_EVENT_FILE_LOADED -> {
+                        // 文件加载成功
+                        jzvd.onPrepared()
+                    }
+                    MPVLib.mpvEventId.MPV_EVENT_PLAYBACK_RESTART -> {
+                        // 播放重新开始
+                        jzvd.onStatePlaying()
+                    }
+                    MPVLib.mpvEventId.MPV_EVENT_END_FILE -> {
+                        // 播放结束
+                        jzvd.onCompletion()
+                    }
+                    MPVLib.mpvEventId.MPV_EVENT_SHUTDOWN -> {
+                        Log.e(TAG, "event: $eventId")
+                    }
+                }
+            }
+        }
     }
 }

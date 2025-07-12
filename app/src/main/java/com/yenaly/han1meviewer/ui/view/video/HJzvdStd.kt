@@ -37,6 +37,7 @@ import com.yenaly.han1meviewer.Preferences
 import com.yenaly.han1meviewer.R
 import com.yenaly.han1meviewer.logic.entity.HKeyframeEntity
 import com.yenaly.han1meviewer.ui.adapter.HKeyframeRvAdapter
+import com.yenaly.han1meviewer.ui.adapter.SuperResolutionAdapter
 import com.yenaly.han1meviewer.ui.adapter.VideoSpeedAdapter
 import com.yenaly.han1meviewer.util.setStateViewLayout
 import com.yenaly.han1meviewer.util.showAlertDialog
@@ -86,6 +87,11 @@ class HJzvdStd @JvmOverloads constructor(
         const val DEF_SPEED_INDEX = 2
 
         /**
+         * 默认的超分辨率的索引
+         */
+        const val DEF_SUPER_RESOLUTION_INDEX = 0
+
+        /**
          * 默認長按速度是原先速度的幾倍
          */
         const val DEF_LONG_PRESS_SPEED_TIMES = 2.5F
@@ -104,6 +110,13 @@ class HJzvdStd @JvmOverloads constructor(
          * 速度列表的字符串
          */
         val speedStringArray = Array(speedArray.size) { "${speedArray[it]}x" }
+
+        /**
+         * 超分辨率列表
+         */
+        val superResolutionArray = arrayOf(
+            "关闭", "速度", "质量"
+        )
     }
 
     init {
@@ -167,6 +180,11 @@ class HJzvdStd @JvmOverloads constructor(
     private val isHKeyframeEnabled = Preferences.hKeyframesEnable
 
     /**
+     * 用户选择的播放器内核
+     */
+    private val switchPlayerKernel = Preferences.switchPlayerKernel
+
+    /**
      * 當前速度的索引，如果设置速度的话，修改这个，别动 [videoSpeed]
      */
     private var currentSpeedIndex = userDefSpeedIndex
@@ -186,7 +204,22 @@ class HJzvdStd @JvmOverloads constructor(
             jzDataSource.objects[0] = value
         }
 
+    private var superResolutionIndex = 0
+        set(value) {
+            field = value
+            if (value == DEF_SUPER_RESOLUTION_INDEX) {
+                superResolution.text = context.getString(R.string.super_resolution)
+            } else {
+                superResolution.text = superResolutionArray[value]
+            }
+            if (mediaInterface is MpvMediaKernel) {
+                val kernel = mediaInterface as MpvMediaKernel
+                kernel.setSuperResolution(value)
+            }
+        }
+
     private lateinit var tvSpeed: TextView
+    private lateinit var superResolution: TextView
     private lateinit var tvKeyframe: TextView
     private lateinit var tvTimer: TextView
     private lateinit var btnGoHome: ImageView
@@ -287,6 +320,7 @@ class HJzvdStd @JvmOverloads constructor(
         super.init(context)
         SAVE_PROGRESS = false
         tvSpeed = findViewById(R.id.tv_speed)
+        superResolution = findViewById(R.id.super_resolution)
         tvKeyframe = findViewById(R.id.tv_keyframe)
         tvTimer = findViewById(R.id.tv_timer)
         btnGoHome = findViewById(R.id.go_home)
@@ -297,9 +331,11 @@ class HJzvdStd @JvmOverloads constructor(
         tvKeyframe.setOnClickListener(this)
         tvKeyframe.setOnLongClickListener(this)
         btnGoHome.setOnClickListener(this)
+        superResolution.setOnClickListener(this)
     }
 
     override fun setUp(jzDataSource: JZDataSource?, screen: Int) {
+        Log.d(TAG, "setUp: 2")
         super.setUp(jzDataSource, screen, ExoMediaKernel::class.java)
     }
 
@@ -308,6 +344,7 @@ class HJzvdStd @JvmOverloads constructor(
     }
 
     override fun setUp(jzDataSource: JZDataSource?, screen: Int, clazz: Class<*>) {
+        Log.d(TAG, "setUp: 3")
         super.setUp(jzDataSource, screen, clazz)
         Log.d("CustomJzvdStd-Settings", buildString {
             append("showBottomProgress: ")
@@ -413,6 +450,7 @@ class HJzvdStd @JvmOverloads constructor(
         super.setScreenNormal()
         backButton.isVisible = true
         tvSpeed.isVisible = false
+        superResolution.isVisible = false
         tvKeyframe.isVisible = false
         titleTextView.isInvisible = true
         tvTimer.isInvisible = true
@@ -427,6 +465,8 @@ class HJzvdStd @JvmOverloads constructor(
     override fun setScreenFullscreen() {
         super.setScreenFullscreen()
         tvSpeed.isVisible = true
+        // 非 MpvPlayer 内核不支持超分辨率
+        superResolution.isVisible = switchPlayerKernel == HMediaKernel.Type.MpvPlayer.name
         if (isHKeyframeEnabled) tvKeyframe.isVisible = true
         titleTextView.isVisible = true
         // btnGoHome.isVisible = false
@@ -460,6 +500,7 @@ class HJzvdStd @JvmOverloads constructor(
         super.onClick(v)
         when (v.id) {
             R.id.tv_speed -> clickSpeed()
+            R.id.super_resolution -> clickSuperResolution()
             R.id.tv_keyframe -> onKeyframeClickListener?.invoke(v)
             R.id.go_home -> onGoHomeClickListener?.invoke(v)
         }
@@ -722,6 +763,28 @@ class HJzvdStd @JvmOverloads constructor(
         rv.adapter = VideoSpeedAdapter(currentSpeedIndex).apply {
             setOnItemClickListener { _, _, position ->
                 currentSpeedIndex = position
+                popup.dismiss()
+            }
+        }
+        popup.showAtLocation(textureViewContainer, Gravity.END, 0, 0)
+    }
+
+    @SuppressLint("InflateParams")
+    fun clickSuperResolution() {
+        onCLickUiToggleToClear()
+        val inflater = LayoutInflater.from(context).inflate(R.layout.jz_layout_speed, null)
+        val rv = inflater.findViewById<RecyclerView>(R.id.rv_video_speed)
+        val popup = PopupWindow(
+            inflater, JZUtils.dip2px(jzvdContext, 240f),
+            LayoutParams.MATCH_PARENT, true
+        ).apply {
+            contentView = inflater
+            animationStyle = cn.jzvd.R.style.pop_animation
+        }
+        rv.layoutManager = LinearLayoutManager(context)
+        rv.adapter = SuperResolutionAdapter(superResolutionIndex).apply {
+            setOnItemClickListener { _, _, position ->
+                superResolutionIndex = position
                 popup.dismiss()
             }
         }

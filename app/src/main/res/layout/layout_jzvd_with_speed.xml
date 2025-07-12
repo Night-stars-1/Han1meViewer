@@ -76,6 +76,16 @@
             android:textAlignment="center"
             android:textColor="#ffffff" />
 
+        <TextView
+            android:id="@+id/super_resolution"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:paddingLeft="20dp"
+            android:text="@string/super_resolution"
+            android:textAlignment="center"
+            android:textColor="#ffffff" />
+
         <ImageView
             android:id="@+id/fullscreen"
             android:layout_width="52.5dp"
