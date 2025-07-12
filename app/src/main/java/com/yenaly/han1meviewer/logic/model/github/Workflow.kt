@@ -1,5 +1,6 @@
 package com.yenaly.han1meviewer.logic.model.github
 
+import android.os.Build
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -25,8 +26,10 @@ data class WorkflowRuns(
 data class Artifacts(
     @SerialName("artifacts") val artifacts: List<Artifact>,
 ) {
-    val downloadLink: String get() = artifacts.first().downloadLink
-    val nodeId: String get() = artifacts.first().nodeId
+    val artifact get() = artifacts.firstOrNull { it.name.contains(Build.SUPPORTED_ABIS[0]) }
+        ?: artifacts.first { it.name.contains("universal") }
+    val downloadLink: String get() = artifact.downloadLink
+    val nodeId: String get() = artifact.nodeId
 
     @Serializable
     data class Artifact(

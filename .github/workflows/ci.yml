@@ -48,13 +48,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           path: app/build/outputs/apk/release/Han1meViewer-v*_armeabi-v7a.apk
-          name: Han1meViewer-release-${{ github.sha }}-arm32
+          name: Han1meViewer-release-${{ github.sha }}-armeabi-v7a
 
       - name: Upload Artifacts(arm64)
         uses: actions/upload-artifact@v4
         with:
           path: app/build/outputs/apk/release/Han1meViewer-v*_arm64-v8a.apk
-          name: Han1meViewer-release-${{ github.sha }}-arm64
+          name: Han1meViewer-release-${{ github.sha }}-arm64-v8a
 
       - name: Upload Artifacts(universal)
         uses: actions/upload-artifact@v4
