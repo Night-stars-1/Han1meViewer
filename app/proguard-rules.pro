@@ -29,3 +29,4 @@
 
 -keep class com.google.android.gms.** { *; }
 -keep interface com.google.android.gms.** { *; }
+-keep,allowoptimization class is.xyz.mpv.** { public protected *; }
