@@ -60,6 +60,15 @@ android {
         buildConfigField("int", "SEARCH_YEAR_RANGE_END", "${Config.thisYear}")
     }
 
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("armeabi-v7a", "arm64-v8a")
+            isUniversalApk = false
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -67,12 +76,6 @@ android {
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
             )
-            applicationVariants.all variant@{
-                this@variant.outputs.all output@{
-                    val output = this@output as BaseVariantOutputImpl
-                    output.outputFileName = "Han1meViewer-v${defaultConfig.versionName}.apk"
-                }
-            }
         }
         debug {
             isMinifyEnabled = false
@@ -80,6 +83,18 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
             )
             applicationIdSuffix = ".debug"
+        }
+    }
+    applicationVariants.all {
+        outputs.forEach { output ->
+            val outputImpl = output as BaseVariantOutputImpl
+            val abi = outputImpl.filters.find { it.filterType == "ABI" }?.identifier
+
+            outputImpl.outputFileName = if (abi != null) {
+                "Han1meViewer-v${defaultConfig.versionName}_$abi.apk"
+            } else {
+                "Han1meViewer-v${defaultConfig.versionName}_universal.apk"
+            }
         }
     }
     buildFeatures {
