@@ -69,8 +69,8 @@ object HUpdater {
                 if (isNeeded) {
                     return Latest(
                         ver.tagName, ver.body,
-                        ver.assets.first().browserDownloadURL,
-                        ver.assets.first().nodeID
+                        ver.asset.browserDownloadURL,
+                        ver.asset.nodeID
                     )
                 }
             }

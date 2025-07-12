@@ -1,5 +1,6 @@
 package com.yenaly.han1meviewer.logic.model.github
 
+import android.os.Build
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -53,6 +54,10 @@ data class Release(
 
     val body: String,
 ) {
+
+    val asset get() = assets.firstOrNull { it.name.contains(Build.SUPPORTED_ABIS[0]) }
+        ?: assets.first { it.name.contains("universal") }
+
     @Serializable
     data class Asset(
         val url: String,
