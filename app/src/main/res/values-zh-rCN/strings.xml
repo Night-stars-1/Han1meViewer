@@ -190,7 +190,7 @@
     <string name="use_ci_update_channel_summary">CI 更新频道能更快地获取最新变更\n但不保证稳定性</string>
     <string name="update_popup_interval_days">检查更新弹窗间隔天数</string>
     <string name="update_failed">更新失败</string>
-    <string name="update_download_background">在背景下载更新</string>
+    <string name="update_download_background">在后台下载更新</string>
     <string name="allow_install_from_unknown_app_sources">准许当前 App 来源安装</string>
     <string name="reason_for_allow_install_from_unknown_app_sources">别担心，这只是为了更新。\n你如果不放心，可以直接去 Github 上下载</string>
     <string name="go_to_settings">前往设置</string>

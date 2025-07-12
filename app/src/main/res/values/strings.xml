@@ -194,7 +194,7 @@
     <string name="use_ci_update_channel_summary">CI 更新頻道能更快地取得最新變更\n但不保證穩定性</string>
     <string name="update_popup_interval_days">檢查更新跳出視窗間隔天數</string>
     <string name="update_failed">更新失敗</string>
-    <string name="update_download_background">在背景下載更新</string>
+    <string name="update_download_background">在后台下載更新</string>
     <string name="allow_install_from_unknown_app_sources">允許當前 App 來源安裝</string>
     <string name="reason_for_allow_install_from_unknown_app_sources">不用擔心，這只是為了更新。\n你如果不放心，可以直接去 Github 上下載</string>
     <string name="go_to_settings">前往設定</string>
