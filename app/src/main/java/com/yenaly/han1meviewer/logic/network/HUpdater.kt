@@ -39,6 +39,8 @@ object HUpdater {
     suspend fun checkForUpdate(forceCheck: Boolean = false): Latest? {
         // 如果未设置HA1_GITHUB_TOKEN，则不检测版本更新
         if (BuildConfig.HA1_GITHUB_TOKEN.isEmpty()) return null
+        // debug模式不检测更新
+        if (BuildConfig.DEBUG) return null
         if (forceCheck || Preferences.isUpdateDialogVisible) {
             if (Preferences.useCIUpdateChannel && Firebase.remoteConfig.getBoolean(FirebaseConstants.ENABLE_CI_UPDATE)) {
                 val curSha = BuildConfig.COMMIT_SHA
