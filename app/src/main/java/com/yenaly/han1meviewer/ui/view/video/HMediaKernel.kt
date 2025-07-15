@@ -386,9 +386,8 @@ class MpvMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd) {
     }
 
     override fun isPlaying(): Boolean {
-        val playbackActive = MPVLib.getPropertyBoolean("playback-active")
-        val isPlaying = playbackActive ?: false
-        return isPlaying
+        val pause = MPVLib.getPropertyBoolean("pause")
+        return !pause
     }
 
     override fun seekTo(time: Long) {
@@ -396,6 +395,7 @@ class MpvMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd) {
     }
 
     override fun release() {
+        Log.d(TAG, "release")
         clearSuperResolution()
         MPVLib.setPropertyBoolean("pause", true)
         MPVLib.command(arrayOf("loadfile", "", "replace"))
@@ -442,14 +442,12 @@ class MpvMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd) {
         MPVLib.setPropertyString("android-surface-size", "${width}x$height")
     }
 
-    override fun onSurfaceTextureDestroyed(surfaceTexture: SurfaceTexture): Boolean {
-        return false
-    }
+    override fun onSurfaceTextureDestroyed(surfaceTexture: SurfaceTexture): Boolean = false
 
     override fun onSurfaceTextureUpdated(surfaceTexture: SurfaceTexture) {}
 
 
-    fun clearSuperResolution() {
+    private fun clearSuperResolution() {
         MPVLib.command(arrayOf("change-list", "glsl-shaders", "clr", ""))
     }
     fun setSuperResolution(index: Int) {
