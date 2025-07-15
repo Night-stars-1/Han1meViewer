@@ -432,7 +432,7 @@ object Parser {
             }
         }
 
-        val artistAvatarUrl = parseBody.getElementById("video-user-avatar")?.absUrl("src")
+        val artistAvatarUrl = parseBody.selectFirst("#video-user-avatar + img")?.absUrl("src")
         val artistNameCSS = parseBody.getElementById("video-artist-name")
         val artistGenre = artistNameCSS?.nextElementSibling()?.text()?.trim()
         val artistName = artistNameCSS?.text()?.trim()
