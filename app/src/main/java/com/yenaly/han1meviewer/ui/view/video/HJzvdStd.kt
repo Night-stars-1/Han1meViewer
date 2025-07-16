@@ -1,7 +1,10 @@
 package com.yenaly.han1meviewer.ui.view.video
 
 import android.annotation.SuppressLint
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Typeface
 import android.media.AudioManager
 import android.provider.Settings
@@ -21,6 +24,7 @@ import android.widget.PopupWindow
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.annotation.IntRange
+import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import androidx.core.view.isGone
 import androidx.core.view.isInvisible

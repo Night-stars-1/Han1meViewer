@@ -358,5 +358,7 @@ Recommendations are as follows:\n
     <string name="check_video_exists_in_download">I noticed you seem to have downloaded the video with resolution %s</string>
     <string name="retry">Retry</string>
     <string name="super_resolution">Super Resolution</string>
+    <string name="allow_pip">Open PIP</string>
+    <string name="allow_pip_summary">Returning to the home screen displays the video in picture-in-picture (PiP) mode</string>
 
 </resources>

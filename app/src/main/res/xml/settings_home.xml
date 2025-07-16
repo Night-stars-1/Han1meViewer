@@ -15,6 +15,13 @@
             app:key="player_settings"
             app:title="@string/player_settings" />
 
+        <com.yenaly.yenaly_libs.base.preference.MaterialSwitchPreference
+            app:icon="@drawable/pip_24px"
+            app:defaultValue="false"
+            app:key="allow_pip"
+            app:summary="@string/allow_pip_summary"
+            app:title="@string/allow_pip" />
+
         <!-- #issue-104: 关键H帧移出设置 -->
 
         <Preference

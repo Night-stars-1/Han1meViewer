@@ -368,5 +368,7 @@
     <string name="check_video_exists_in_download">我注意到你好像下載過畫質為 %s 的該影片</string>
     <string name="retry">重試</string>
     <string name="super_resolution">超分辨率</string>
+    <string name="allow_pip">開啓畫中畫模式</string>
+    <string name="allow_pip_summary">返回主界面后小窗顯示視頻</string>
 
 </resources>

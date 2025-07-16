@@ -2,11 +2,15 @@ package com.yenaly.han1meviewer.ui.fragment.settings
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.view.View
 import androidx.annotation.RequiresApi
+import androidx.core.content.edit
 import androidx.core.net.toUri
 import androidx.core.text.parseAsHtml
 import androidx.lifecycle.Lifecycle
@@ -76,6 +80,8 @@ class HomeSettingsFragment : YenalySettingsFragment(R.xml.settings_home),
         const val USE_CI_UPDATE_CHANNEL = "use_ci_update_channel"
 
         const val USE_ANALYTICS = "use_analytics"
+
+        const val ALLOW_PIP = "allow_pip"
     }
 
     private val videoLanguage
@@ -106,6 +112,9 @@ class HomeSettingsFragment : YenalySettingsFragment(R.xml.settings_home),
             by safePreference<Preference>(APPLY_DEEP_LINKS)
     private val useAnalytics
             by safePreference<HPrivacyPreference>(USE_ANALYTICS)
+
+    private val allowPIP
+            by safePreference<SwitchPreferenceCompat>(ALLOW_PIP)
 
     private var checkUpdateTimes = 0
 
@@ -245,6 +254,25 @@ class HomeSettingsFragment : YenalySettingsFragment(R.xml.settings_home),
             setOnPreferenceLongClickListener {
                 privacyDialog.showWithBlurEffect()
                 return@setOnPreferenceLongClickListener true
+            }
+        }
+
+        allowPIP.apply {
+            setOnPreferenceChangeListener { preference, newValue ->
+                val enabled = newValue as Boolean
+                if (enabled) {
+                    val hasPip = context.packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
+
+                    preference.sharedPreferences?.edit {
+                        putBoolean(preference.key, hasPip)
+                    }
+
+                    if (preference is SwitchPreferenceCompat) {
+                        preference.isChecked = hasPip
+                    }
+                    return@setOnPreferenceChangeListener hasPip
+                }
+                return@setOnPreferenceChangeListener true
             }
         }
     }
