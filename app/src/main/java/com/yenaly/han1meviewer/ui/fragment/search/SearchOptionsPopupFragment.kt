@@ -73,6 +73,8 @@ class SearchOptionsPopupFragment :
         HSubscriptionAdapter()
     }
 
+    var onSearchListener: () -> Unit = {}
+
     // Popups
 
     private val timePickerPopup: TimePickerPopup
@@ -125,7 +127,7 @@ class SearchOptionsPopupFragment :
 
     override fun initData(savedInstanceState: Bundle?, dialog: Dialog) {
         // #issue-199: 片长搜索官网取消了
-        binding.duration.isAvailable = false
+//        binding.duration.isAvailable = false
         // 简单的厂商搜索官网取消了
         binding.brand.isAvailable = false
 
@@ -335,6 +337,10 @@ class SearchOptionsPopupFragment :
                 }
                 return@lc true
             }
+        }
+
+        binding.search.setOnClickListener {
+            onSearchListener.invoke()
         }
     }
 

@@ -37,13 +37,14 @@
         android:id="@+id/tl_tag"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="?attr/colorSurfaceContainer"
         app:tabMode="auto" />
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/vp_tag"
         android:layout_width="match_parent"
         android:layout_height="300dp"
-        android:background="?android:colorBackground"
+        android:background="?attr/colorSurfaceContainer"
         android:clipToPadding="true"
         android:paddingHorizontal="8dp"
         android:paddingBottom="8dp" />

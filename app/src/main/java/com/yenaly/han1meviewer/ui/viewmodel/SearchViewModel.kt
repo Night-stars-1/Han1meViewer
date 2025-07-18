@@ -86,9 +86,16 @@ class SearchViewModel(application: Application) : YenalyViewModel(application) {
         duration: String?, tags: Set<String>, brands: Set<String>,
     ) {
         viewModelScope.launch {
+            var date: String? = null
+            if (year != null && month != null) {
+                date = "$year 年 $month 月"
+            }
+            if (year != null && month == null) {
+                date = "$year 年"
+            }
             NetworkRepo.getHanimeSearchResult(
                 page, query, genre,
-                sort, broad, year, month,
+                sort, broad, date,
                 duration, tags, brands
             ).collect { state ->
                 val prev = _searchStateFlow.getAndUpdate { state }

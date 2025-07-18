@@ -13,6 +13,7 @@ import androidx.activity.addCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.core.util.size
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isGone
@@ -285,6 +286,11 @@ class SearchActivity : YenalyActivity<ActivitySearchBinding>(), StateLayoutMixin
                 }.flowOn(Dispatchers.IO).onEach {
                     this@SearchActivity.historyAdapter.submitList(it)
                 }.flowWithLifecycle(lifecycle).launchIn(lifecycleScope)
+        }
+
+        optionsPopupFragment.onSearchListener = {
+            optionsPopupFragment.dismiss()
+            binding.searchSrl.autoRefresh()
         }
     }
 

@@ -8,124 +8,148 @@
     <data>
 
     </data>
-
-    <LinearLayout
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/shape_reply_show_bottom_dialog"
-        android:clipToPadding="false"
-        android:orientation="vertical"
-        android:paddingHorizontal="16dp"
-        android:paddingBottom="16dp">
-
-        <View
-            android:layout_width="100dp"
-            android:layout_height="3dp"
-            android:layout_gravity="center"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="16dp"
-            android:background="#80FFFFFF" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:text="@string/advanced_search"
-            android:textSize="24sp"
-            android:textStyle="bold" />
-
+        android:clipToPadding="false" >
         <LinearLayout
-            android:id="@+id/ll_subscription"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:clipToPadding="false"
             android:orientation="vertical"
-            android:visibility="gone"
-            tools:visibility="visible">
+            android:paddingHorizontal="16dp"
+            android:paddingBottom="16dp">
+
+            <View
+                android:layout_width="100dp"
+                android:layout_height="3dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="16dp"
+                android:background="#80FFFFFF" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/textView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/advanced_search"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintHorizontal_chainStyle="spread_inside"
+                    app:layout_constraintLeft_toLeftOf="parent" />
+
+                <Button
+                    android:id="@+id/search"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/search"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintRight_toRightOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_subscription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <TextView
+                    android:id="@+id/tv_subscription"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:text="@string/subscription"
+                    android:textSize="18sp" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_subscription"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
+
+            <GridLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:columnCount="2"
+                android:rowCount="3"
+                tools:ignore="UselessParent">
+
+                <com.yenaly.han1meviewer.ui.view.HOptionChip
+                    android:id="@+id/type"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="8dp"
+                    android:text="@string/type"
+                    android:textAlignment="center" />
+
+
+                <com.yenaly.han1meviewer.ui.view.HOptionChip
+                    android:id="@+id/sort_option"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/sort_option"
+                    android:textAlignment="center" />
+
+                <com.yenaly.han1meviewer.ui.view.HOptionChip
+                    android:id="@+id/tag"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="8dp"
+                    android:text="@string/tag"
+                    android:textAlignment="center" />
+
+                <com.yenaly.han1meviewer.ui.view.HOptionChip
+                    android:id="@+id/brand"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/brand"
+                    android:textAlignment="center" />
+
+                <com.yenaly.han1meviewer.ui.view.HOptionChip
+                    android:id="@+id/release_date"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="8dp"
+                    android:text="@string/release_date"
+                    android:textAlignment="center" />
+
+                <com.yenaly.han1meviewer.ui.view.HOptionChip
+                    android:id="@+id/duration"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/duration"
+                    android:textAlignment="center" />
+
+            </GridLayout>
 
             <TextView
-                android:id="@+id/tv_subscription"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:text="@string/subscription"
-                android:textSize="18sp" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_subscription"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_marginTop="16dp"
+                android:text="@string/search_options_tips" />
 
         </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
-        <GridLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:columnCount="2"
-            android:rowCount="3"
-            tools:ignore="UselessParent">
-
-            <com.yenaly.han1meviewer.ui.view.HOptionChip
-                android:id="@+id/type"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="8dp"
-                android:text="@string/type"
-                android:textAlignment="center" />
-
-
-            <com.yenaly.han1meviewer.ui.view.HOptionChip
-                android:id="@+id/sort_option"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:text="@string/sort_option"
-                android:textAlignment="center" />
-
-            <com.yenaly.han1meviewer.ui.view.HOptionChip
-                android:id="@+id/tag"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="8dp"
-                android:text="@string/tag"
-                android:textAlignment="center" />
-
-            <com.yenaly.han1meviewer.ui.view.HOptionChip
-                android:id="@+id/brand"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:text="@string/brand"
-                android:textAlignment="center" />
-
-            <com.yenaly.han1meviewer.ui.view.HOptionChip
-                android:id="@+id/release_date"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="8dp"
-                android:text="@string/release_date"
-                android:textAlignment="center" />
-
-            <com.yenaly.han1meviewer.ui.view.HOptionChip
-                android:id="@+id/duration"
-                android:layout_height="wrap_content"
-                android:layout_columnWeight="1"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:text="@string/duration"
-                android:textAlignment="center" />
-
-        </GridLayout>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="@string/search_options_tips" />
-
-    </LinearLayout>
 </layout>
