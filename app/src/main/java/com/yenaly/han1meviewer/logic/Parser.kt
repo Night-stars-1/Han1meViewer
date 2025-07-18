@@ -277,8 +277,7 @@ object Parser {
         val title = parseBody.getElementById("shareBtn-title")?.text()
             .throwIfParseNull(Parser::hanimeVideoVer2.name, "title")
 
-        val likeStatus = parseBody.selectFirst("input[name=like-status]")
-            ?.attr("value")
+        val likeStatus = parseBody.selectFirst("#video-like-btn .material-icons")
         val likesCount = parseBody.selectFirst("input[name=likes-count]")
             ?.attr("value")?.toIntOrNull()
 
@@ -478,7 +477,7 @@ object Parser {
                 relatedHanimes = relatedAnimeList,
                 artist = artist.logIfParseNull(Parser::hanimeVideoVer2.name, "artist"),
                 favTimes = likesCount,
-                isFav = likeStatus == "1",
+                isFav = likeStatus != null,
                 csrfToken = csrfToken,
                 currentUserId = currentUserId
             )
