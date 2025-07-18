@@ -24,6 +24,7 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.addCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -94,6 +95,8 @@ class VideoActivity : YenalyActivity<ActivityVideoBinding>(),
     private val videoCode by intentExtra<String>(VIDEO_CODE)
     private var videoTitle: String? = null
     private var videoCodeByWebsite: String? = null
+
+    private var builder: PictureInPictureParams.Builder? = null
 
     private val tabNameArray = intArrayOf(R.string.introduction, R.string.comment)
 
@@ -359,8 +362,11 @@ class VideoActivity : YenalyActivity<ActivityVideoBinding>(),
         override fun onReceive(context: Context, intent: Intent) {
             Log.d("mpv", "onReceive: ${intent.action}")
             when (intent.action) {
-                ACTION_PLAY -> binding.videoPlayer.startVideo()
+                ACTION_PLAY -> binding.videoPlayer.startButton.performClick()
                 ACTION_PAUSE -> goOnPlayOnPause()
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                updatePIPAction()
             }
         }
     }
@@ -387,40 +393,43 @@ class VideoActivity : YenalyActivity<ActivityVideoBinding>(),
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun updatePIPAction() {
+        val (iconRes, titleRes, actionRes) = if (binding.videoPlayer.state == Jzvd.STATE_PLAYING) {
+            Triple(R.drawable.pause_circle_24px, R.string.pause, ACTION_PAUSE)
+        } else {
+            Triple(R.drawable.play_circle_24px, R.string.continues, ACTION_PLAY)
+        }
+        val pauseIntent = PendingIntent.getBroadcast(
+            activity,
+            0,
+            Intent(actionRes).setPackage(activity?.packageName),
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        val action = RemoteAction(
+            Icon.createWithResource(activity, iconRes),
+            getString(titleRes),
+            getString(titleRes),
+            pauseIntent
+        )
+        builder?.setActions(listOf(action))
+    }
+
     private fun initPIP() {
         registerReceiver()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val aspectRatio = Rational(16, 9)
-            val (iconRes, titleRes, actionRes) = if (binding.videoPlayer.state == Jzvd.STATE_PLAYING) {
-                Triple(R.drawable.pause_circle_24px, R.string.pause, ACTION_PAUSE)
-            } else {
-                Triple(R.drawable.play_circle_24px, R.string.continues, ACTION_PLAY)
-            }
-            val pauseIntent = PendingIntent.getBroadcast(
-                activity,
-                0,
-                Intent(actionRes).setPackage(activity?.packageName),
-                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-            )
-            val action = RemoteAction(
-                Icon.createWithResource(activity, iconRes),
-                getString(titleRes),
-                getString(titleRes),
-                pauseIntent
-            )
             binding.videoPlayer.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
                 val sourceRectHint = Rect()
                 binding.videoPlayer.getGlobalVisibleRect(sourceRectHint)
-                val builder = PictureInPictureParams.Builder()
+                builder = PictureInPictureParams.Builder()
                     .setAspectRatio(aspectRatio)
                     .setSourceRectHint(sourceRectHint)
-                    .setActions(listOf(action))
+                updatePIPAction()
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    builder.setAutoEnterEnabled(true)
-                    setPictureInPictureParams(builder.build())
-                } else {
-                    enterPictureInPictureMode(builder.build())
+                    builder?.setAutoEnterEnabled(true)
                 }
+                setPictureInPictureParams(builder!!.build())
             }
         }
     }

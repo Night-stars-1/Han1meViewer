@@ -498,7 +498,6 @@ class HJzvdStd @JvmOverloads constructor(
             val kernel = mediaInterface as MpvMediaKernel
             post {
                 if (fullscreen) {
-//                    oldWidth = 1236
                     kernel.updateSurFaceSize(width, height)
                 } else {
                     kernel.updateSurFaceSize(width, height)
