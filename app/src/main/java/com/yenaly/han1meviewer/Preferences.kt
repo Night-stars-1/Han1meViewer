@@ -123,7 +123,10 @@ object Preferences {
             ?: HANIME_MAIN_BASE_URL
 
     val useBuiltInHosts: Boolean
-        get() = preferenceSp.getBoolean(NetworkSettingsFragment.USE_BUILT_IN_HOSTS, false)
+        get() = preferenceSp.getBoolean(NetworkSettingsFragment.USE_BUILT_IN_HOSTS, true)
+
+    val isPipAllowed: Boolean
+        get() = preferenceSp.getBoolean(HomeSettingsFragment.ALLOW_PIP, false)
 
     // 關鍵H幀 相關
 

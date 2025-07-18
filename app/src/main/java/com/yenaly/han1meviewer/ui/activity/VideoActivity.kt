@@ -33,7 +33,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.preference.PreferenceManager
 import cn.jzvd.JZMediaInterface
 import cn.jzvd.Jzvd
 import cn.jzvd.Jzvd.goOnPlayOnPause
@@ -146,11 +145,7 @@ class VideoActivity : YenalyActivity<ActivityVideoBinding>(),
         lifecycle.addObserver(OrientationManager(this))
         initViewPager()
         initHKeyframe()
-        activity?.let {
-            val isPipAllowed = PreferenceManager.getDefaultSharedPreferences(activity!!)
-                .getBoolean(ALLOW_PIP, false)
-            if (isPipAllowed) initPIP()
-        }
+        if (Preferences.isPipAllowed) initPIP()
     }
 
     override fun bindDataObservers() {
@@ -334,10 +329,7 @@ class VideoActivity : YenalyActivity<ActivityVideoBinding>(),
         }
     }
 
-    @Deprecated("Deprecated in android.app.Activity")
-    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean) {
-        super.onPictureInPictureModeChanged(isInPictureInPictureMode)
-        // 当全屏状态进入画中画时 videoPlayer.layoutParams 为 FrameLayout.LayoutParams
+    fun updateVideoPlayerSize(isInPictureInPictureMode: Boolean) {
         if (binding.videoPlayer.layoutParams !is LinearLayout.LayoutParams) return
         if (isInPictureInPictureMode) {
             // 进入画中画模式时，设置视频播放器的布局参数为全屏
@@ -353,6 +345,13 @@ class VideoActivity : YenalyActivity<ActivityVideoBinding>(),
             params.height = 250.dp
             binding.videoPlayer.layoutParams = params
         }
+    }
+
+    @Deprecated("Deprecated in android.app.Activity")
+    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode)
+        // 当全屏状态进入画中画时 videoPlayer.layoutParams 为 FrameLayout.LayoutParams
+        updateVideoPlayerSize(isInPictureInPictureMode)
     }
 
     private val playbackReceiver = object : BroadcastReceiver() {

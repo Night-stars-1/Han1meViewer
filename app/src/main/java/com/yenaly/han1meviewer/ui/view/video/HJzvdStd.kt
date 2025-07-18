@@ -24,7 +24,6 @@ import android.widget.PopupWindow
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.annotation.IntRange
-import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import androidx.core.view.isGone
 import androidx.core.view.isInvisible
@@ -43,11 +42,13 @@ import com.yenaly.han1meviewer.logic.entity.HKeyframeEntity
 import com.yenaly.han1meviewer.ui.adapter.HKeyframeRvAdapter
 import com.yenaly.han1meviewer.ui.adapter.SuperResolutionAdapter
 import com.yenaly.han1meviewer.ui.adapter.VideoSpeedAdapter
+import com.yenaly.han1meviewer.util.Platform
 import com.yenaly.han1meviewer.util.setStateViewLayout
 import com.yenaly.han1meviewer.util.showAlertDialog
 import com.yenaly.yenaly_libs.utils.OrientationManager
 import com.yenaly.yenaly_libs.utils.activity
 import com.yenaly.yenaly_libs.utils.appScreenWidth
+import com.yenaly.yenaly_libs.utils.dp
 import com.yenaly.yenaly_libs.utils.navBarHeight
 import com.yenaly.yenaly_libs.utils.statusBarHeight
 import com.yenaly.yenaly_libs.utils.unsafeLazy
@@ -452,6 +453,8 @@ class HJzvdStd @JvmOverloads constructor(
 
     override fun setScreenNormal() {
         super.setScreenNormal()
+        updateVideoPlayerSize(false)
+
         backButton.isVisible = true
         tvSpeed.isVisible = false
         superResolution.isVisible = false
@@ -468,6 +471,8 @@ class HJzvdStd @JvmOverloads constructor(
 
     override fun setScreenFullscreen() {
         super.setScreenFullscreen()
+        updateVideoPlayerSize(true)
+
         tvSpeed.isVisible = true
         // 非 MpvPlayer 内核不支持超分辨率
         superResolution.isVisible = switchPlayerKernel == HMediaKernel.Type.MpvPlayer.name
@@ -483,6 +488,24 @@ class HJzvdStd @JvmOverloads constructor(
         bottomProgressBar.updatePadding(left = statusBarHeight, right = navBarHeight)
     }
 
+    /**
+     * 主动改变播放器大小，兼容华为设备无法监听`onSurfaceTextureSizeChanged`
+     */
+    private fun updateVideoPlayerSize(fullscreen: Boolean) {
+        // 仅华为设备做处理
+        if (!Platform.isHuaweiDevice) return
+        if (mediaInterface is MpvMediaKernel) {
+            val kernel = mediaInterface as MpvMediaKernel
+            post {
+                if (fullscreen) {
+//                    oldWidth = 1236
+                    kernel.updateSurFaceSize(width, height)
+                } else {
+                    kernel.updateSurFaceSize(width, height)
+                }
+            }
+        }
+    }
     override fun clickBack() {
         Log.i(TAG, "backPress")
         when {

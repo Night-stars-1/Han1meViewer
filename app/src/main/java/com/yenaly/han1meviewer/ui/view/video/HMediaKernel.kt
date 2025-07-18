@@ -438,9 +438,14 @@ class MpvMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd) {
         }
     }
 
-    override fun onSurfaceTextureSizeChanged(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
-        Log.d(TAG, "onSurfaceTextureSizeChanged: ")
+    fun updateSurFaceSize(width: Int, height: Int) {
+        Log.d(TAG, "updateSurFaceSize ${width}x${height}")
         MPVLib.setPropertyString("android-surface-size", "${width}x${height}")
+    }
+
+    override fun onSurfaceTextureSizeChanged(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
+        Log.d(TAG, "onSurfaceTextureSizeChanged ${width}x${height}")
+        updateSurFaceSize(width, height)
     }
 
     override fun onSurfaceTextureDestroyed(surfaceTexture: SurfaceTexture): Boolean = false
