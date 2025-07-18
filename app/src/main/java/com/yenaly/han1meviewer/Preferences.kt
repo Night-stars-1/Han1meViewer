@@ -1,6 +1,7 @@
 package com.yenaly.han1meviewer
 
 import android.content.SharedPreferences
+import android.os.Build
 import androidx.preference.PreferenceManager
 import com.yenaly.han1meviewer.logic.network.HProxySelector
 import com.yenaly.han1meviewer.logic.network.interceptor.SpeedLimitInterceptor
@@ -123,10 +124,10 @@ object Preferences {
             ?: HANIME_MAIN_BASE_URL
 
     val useBuiltInHosts: Boolean
-        get() = preferenceSp.getBoolean(NetworkSettingsFragment.USE_BUILT_IN_HOSTS, true)
+        get() = preferenceSp.getBoolean(NetworkSettingsFragment.USE_BUILT_IN_HOSTS, false)
 
     val isPipAllowed: Boolean
-        get() = preferenceSp.getBoolean(HomeSettingsFragment.ALLOW_PIP, false)
+        get() = preferenceSp.getBoolean(HomeSettingsFragment.ALLOW_PIP, false) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
 
     // 關鍵H幀 相關
 

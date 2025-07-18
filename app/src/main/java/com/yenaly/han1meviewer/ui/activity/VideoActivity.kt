@@ -28,6 +28,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
@@ -55,7 +56,6 @@ import com.yenaly.han1meviewer.logic.entity.HKeyframeEntity
 import com.yenaly.han1meviewer.logic.entity.WatchHistoryEntity
 import com.yenaly.han1meviewer.logic.exception.ParseException
 import com.yenaly.han1meviewer.logic.state.VideoLoadingState
-import com.yenaly.han1meviewer.ui.fragment.settings.HomeSettingsFragment.Companion.ALLOW_PIP
 import com.yenaly.han1meviewer.ui.fragment.video.CommentFragment
 import com.yenaly.han1meviewer.ui.fragment.video.VideoIntroductionFragment
 import com.yenaly.han1meviewer.ui.view.video.HMediaKernel
@@ -360,7 +360,6 @@ class VideoActivity : YenalyActivity<ActivityVideoBinding>(),
     private val playbackReceiver = object : BroadcastReceiver() {
 
         override fun onReceive(context: Context, intent: Intent) {
-            Log.d("mpv", "onReceive: ${intent.action}")
             when (intent.action) {
                 ACTION_PLAY -> binding.videoPlayer.startButton.performClick()
                 ACTION_PAUSE -> goOnPlayOnPause()
@@ -368,6 +367,10 @@ class VideoActivity : YenalyActivity<ActivityVideoBinding>(),
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 updatePIPAction()
             }
+
+            // 暂停时隐藏UI
+            binding.videoPlayer.topContainer.isVisible = false
+            binding.videoPlayer.bottomContainer.isVisible = false
         }
     }
 
@@ -431,6 +434,13 @@ class VideoActivity : YenalyActivity<ActivityVideoBinding>(),
                 }
                 setPictureInPictureParams(builder!!.build())
             }
+        }
+    }
+
+    override fun onUserLeaveHint() {
+        super.onUserLeaveHint()
+        if (Preferences.isPipAllowed) {
+            enterPictureInPictureMode()
         }
     }
 
