@@ -36,11 +36,11 @@ jobs:
       - name: Build and sign APK with Gradle
         run: |
           ./gradlew assembleRelease
-          echo "VERSION_CODE=$(find . -name '*arm64-v8a.apk' | head -n 1 | grep -oP '(?<=release\+)\d+(?=_arm64-v8a)')" >> $GITHUB_ENV
+          echo "VERSION_CODE=$(find app/build/outputs/apk/release -name '*arm64-v8a.apk' | head -n 1 | grep -oP '(?<=release\+)\d+(?=_arm64-v8a)')" >> $GITHUB_ENV
         env:
           HA1_KEYSTORE_PASSWORD: ${{ secrets.HA1_KEYSTORE_PASSWORD }}
           HA1_GITHUB_TOKEN: ${{ secrets.HA1_GITHUB_TOKEN }}
-          HA1_VERSION_SOURCE: 'Release'
+          HA1_VERSION_SOURCE: 'release'
 
       - name: Create release
         uses: softprops/action-gh-release@v2.0.4
