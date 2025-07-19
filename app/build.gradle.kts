@@ -56,8 +56,6 @@ android {
         buildConfigField("int", "VERSION_CODE", "$versionCode")
         buildConfigField("String", "HA1_GITHUB_TOKEN", "\"${githubToken}\"")
         buildConfigField("String", "HA1_VERSION_SOURCE", "\"${source}\"")
-
-        buildConfigField("int", "SEARCH_YEAR_RANGE_END", "${Config.thisYear}")
     }
 
     splits {

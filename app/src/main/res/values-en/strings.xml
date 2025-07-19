@@ -360,5 +360,9 @@ Recommendations are as follows:\n
     <string name="super_resolution">Super Resolution</string>
     <string name="allow_pip">Open PIP</string>
     <string name="allow_pip_summary">Returning to the home screen displays the video in picture-in-picture (PiP) mode</string>
+    <string name="only_year">Select only years</string>
+    <string name="year">year</string>
+    <string name="month">month</string>
+    <string name="day">day</string>
 
 </resources>

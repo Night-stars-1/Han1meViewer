@@ -24,8 +24,6 @@ import com.lxj.xpopupext.popup.TimePickerPopup
 import com.yenaly.han1meviewer.FirebaseConstants
 import com.yenaly.han1meviewer.Preferences.isAlreadyLogin
 import com.yenaly.han1meviewer.R
-import com.yenaly.han1meviewer.SEARCH_YEAR_RANGE_END
-import com.yenaly.han1meviewer.SEARCH_YEAR_RANGE_START
 import com.yenaly.han1meviewer.databinding.PopUpFragmentSearchOptionsBinding
 import com.yenaly.han1meviewer.logic.model.SearchOption.Companion.get
 import com.yenaly.han1meviewer.logic.state.WebsiteState
@@ -51,10 +49,6 @@ import java.util.Date
 class SearchOptionsPopupFragment :
     YenalyBottomSheetDialogFragment<PopUpFragmentSearchOptionsBinding>() {
 
-    companion object Tags {
-        private const val POP_UP_BORDER_RADIUS = 36F
-    }
-
     private val viewModel by activityViewModels<SearchViewModel>()
     val myListViewModel by activityViewModels<MyListViewModel>()
 
@@ -74,53 +68,6 @@ class SearchOptionsPopupFragment :
     }
 
     var onSearchListener: () -> Unit = {}
-
-    // Popups
-
-    private val timePickerPopup: TimePickerPopup
-        get() {
-            val date = Calendar.getInstance().also {
-                viewModel.year?.let { year -> it.set(Calendar.YEAR, year) }
-                viewModel.month?.let { month -> it.set(Calendar.MONTH, month - 1) }
-            }
-            val mode = when {
-                viewModel.year != null && viewModel.month != null -> TimePickerPopup.Mode.YM
-                viewModel.year != null -> TimePickerPopup.Mode.Y
-                else -> TimePickerPopup.Mode.YM
-            }
-            val popup = HTimePickerPopup(requireContext())
-                .apply popup@{
-                    setMode(mode)
-                    setYearRange(SEARCH_YEAR_RANGE_START, SEARCH_YEAR_RANGE_END)
-                    setDefaultDate(date)
-                    setTimePickerListener(object : TimePickerListener {
-                        override fun onCancel() = Unit
-                        override fun onTimeChanged(date: Date) = Unit
-
-                        override fun onTimeConfirm(date: Date, view: View?) {
-                            val calendar = Calendar.getInstance()
-                            calendar.time = date
-                            when (this@popup.mode) {
-                                TimePickerPopup.Mode.YM -> {
-                                    viewModel.year = calendar.get(Calendar.YEAR)
-                                    viewModel.month = calendar.get(Calendar.MONTH) + 1
-                                }
-
-                                else -> {
-                                    viewModel.year = calendar.get(Calendar.YEAR)
-                                    viewModel.month = null
-                                }
-                            }
-                            isUserUsed = true
-                            initOptionsChecked()
-                        }
-                    })
-                }
-            return XPopup.Builder(requireContext()).setOptionsCheckedCallback("release_dates")
-                .borderRadius(POP_UP_BORDER_RADIUS)
-                .isDarkTheme(true)
-                .asCustom(popup) as TimePickerPopup
-        }
 
     override fun getViewBinding(layoutInflater: LayoutInflater) =
         PopUpFragmentSearchOptionsBinding.inflate(layoutInflater)
@@ -327,7 +274,27 @@ class SearchOptionsPopupFragment :
         }
         binding.releaseDate.apply {
             setOnClickListener {
-                timePickerPopup.show()
+                HTimePickerDialog(requireContext(), R.string.release_date).apply {
+                    setMode(HTimePickerDialog.Mode.YM)
+                    setDate(
+                        year = viewModel.year,
+                        month = viewModel.month
+                    )
+                    setOnSaveListener { dateSelection ->
+                        viewModel.year = dateSelection.year
+                        viewModel.month = dateSelection.month
+                        initOptionsChecked()
+                        isUserUsed = true
+                    }
+                    setOnDismissListener {
+                        logAdvSearchEvent("release_dates")
+                    }
+                    setonResetListener {
+                        viewModel.year = null
+                        viewModel.month = null
+                        initOptionsChecked()
+                    }
+                }.show()
             }
             setOnLongClickListener lc@{
                 showClearAllTagsDialog {

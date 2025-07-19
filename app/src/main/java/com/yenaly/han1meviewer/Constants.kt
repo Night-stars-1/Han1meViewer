@@ -29,18 +29,6 @@ val LOCAL_DATE_TIME_FORMAT = LocalDateTime.Format {
 const val USER_AGENT =
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"
 
-// 設置發佈日期年份，在搜索的tag裏
-
-/**
- * 發佈日期年份開始於
- */
-const val SEARCH_YEAR_RANGE_START = 1990
-
-/**
- * 發佈日期年份結束於
- */
-const val SEARCH_YEAR_RANGE_END = BuildConfig.SEARCH_YEAR_RANGE_END
-
 // intent傳值用名稱
 
 const val FROM_DOWNLOAD = "FROM_DOWNLOAD"
