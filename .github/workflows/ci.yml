@@ -5,8 +5,6 @@ on:
     branches: [ "master" ]
     paths-ignore:
       - "**.md"
-    tags:
-      - "v*.*.*"
   workflow_dispatch:
 
 permissions:
@@ -48,45 +46,16 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           path: app/build/outputs/apk/release/Han1meViewer-v*_armeabi-v7a.apk
-          name: Han1meViewer-release-${{ github.sha }}-armeabi-v7a
+          name: Han1meViewer-ci-${{ github.sha }}-armeabi-v7a
 
       - name: Upload Artifacts(arm64)
         uses: actions/upload-artifact@v4
         with:
           path: app/build/outputs/apk/release/Han1meViewer-v*_arm64-v8a.apk
-          name: Han1meViewer-release-${{ github.sha }}-arm64-v8a
+          name: Han1meViewer-ci-${{ github.sha }}-arm64-v8a
 
       - name: Upload Artifacts(universal)
         uses: actions/upload-artifact@v4
         with:
           path: app/build/outputs/apk/release/Han1meViewer-v*_universal.apk
-          name: Han1meViewer-release-${{ github.sha }}-universal
-
-      - name: Create release
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2.0.4
-        with:
-          name: Han1meViewer ${{ github.ref_name }}
-          files: app/build/outputs/apk/release/Han1meViewer-v*.apk
-
-  changelog:
-    name: Generate Changelog
-    if: startsWith(github.ref, 'refs/tags/')
-    runs-on: windows-latest
-    needs: build
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4.1.1
-        with:
-          fetch-depth: 0
-          fetch-tags: true
-
-      - name: Generate Changelog
-        id: generate_changelog
-        uses: Night-stars-1/changelog-generator-action@main
-
-      - name: Update Changelog
-        uses: softprops/action-gh-release@v2.0.4
-        with:
-          body: ${{ steps.generate_changelog.outputs.changelog }}
-          make_latest: true
+          name: Han1meViewer-ci-${{ github.sha }}-universal
