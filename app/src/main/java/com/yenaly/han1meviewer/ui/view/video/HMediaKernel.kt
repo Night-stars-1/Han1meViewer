@@ -61,7 +61,7 @@ sealed interface HMediaKernel {
     }
 }
 
-class ExoMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd), Player.Listener, HMediaKernel {
+class ExoMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd), Player.Listener, HMediaKernel, IMedia {
     companion object {
         const val TAG = "ExoMediaKernel"
     }
@@ -291,9 +291,12 @@ class ExoMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd), Player.Listener, HMed
         }
 //            mMediaHandler.removeCallbacks(this)
     }
+
+    override val width: Int get() = _exoPlayer?.videoSize?.width ?: 0
+    override val height: Int get() = _exoPlayer?.videoSize?.height ?: 0
 }
 
-class SystemMediaKernel(jzvd: Jzvd) : JZMediaSystem(jzvd), HMediaKernel {
+class SystemMediaKernel(jzvd: Jzvd) : JZMediaSystem(jzvd), HMediaKernel, IMedia {
     // #issue-26: 有的手機長按快進會報錯，合理懷疑是不是因爲沒有加 post
     // #issue-28: 有的平板长按快进也会报错，结果是 IllegalArgumentException，很奇怪，两次 try-catch 处理试试。
     override fun setSpeed(speed: Float) {
@@ -335,9 +338,12 @@ class SystemMediaKernel(jzvd: Jzvd) : JZMediaSystem(jzvd), HMediaKernel {
     override fun isPlaying(): Boolean {
         return mediaPlayer?.isPlaying == true
     }
+
+    override val width: Int get() = mediaPlayer?.videoWidth ?: 0
+    override val height: Int get() = mediaPlayer?.videoHeight ?: 0
 }
 
-class MpvMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd) {
+class MpvMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd), IMedia {
     companion object {
         const val TAG = "MpvMediaKernel"
     }
@@ -512,4 +518,7 @@ class MpvMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd) {
             }
         }
     }
+
+    override val width: Int get() = MPVLib.getPropertyInt("video-params/w") ?: 0
+    override val height: Int get() = MPVLib.getPropertyInt("video-params/h") ?: 0
 }

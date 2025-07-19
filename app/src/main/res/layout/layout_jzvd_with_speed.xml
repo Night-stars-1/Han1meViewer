@@ -32,7 +32,8 @@
         android:background="@drawable/jz_bottom_bg"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:visibility="invisible">
+        android:visibility="invisible"
+        tools:visibility="visible">
 
         <TextView
             android:id="@+id/current"
@@ -87,6 +88,15 @@
             android:textColor="#ffffff" />
 
         <ImageView
+            android:id="@+id/vertical_fullscreen"
+            android:layout_width="52.5dp"
+            android:layout_height="fill_parent"
+            android:paddingBottom="14dp"
+            android:scaleType="centerInside"
+            android:rotation="90"
+            android:src="@drawable/screenshot_frame_2_24px" />
+
+        <ImageView
             android:id="@+id/fullscreen"
             android:layout_width="52.5dp"
             android:layout_height="fill_parent"
@@ -94,6 +104,7 @@
             android:paddingRight="14dp"
             android:scaleType="centerInside"
             android:src="@drawable/jz_enlarge" />
+
     </LinearLayout>
 
     <ProgressBar

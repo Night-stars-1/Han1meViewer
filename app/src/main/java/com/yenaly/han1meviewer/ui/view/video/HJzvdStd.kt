@@ -1,10 +1,8 @@
 package com.yenaly.han1meviewer.ui.view.video
 
 import android.annotation.SuppressLint
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.pm.ActivityInfo
 import android.graphics.Typeface
 import android.media.AudioManager
 import android.provider.Settings
@@ -19,6 +17,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnLongClickListener
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.PopupWindow
 import android.widget.ProgressBar
@@ -33,6 +32,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import cn.jzvd.JZDataSource
 import cn.jzvd.JZMediaInterface
+import cn.jzvd.JZTextureView
 import cn.jzvd.JZUtils
 import cn.jzvd.JzvdStd
 import com.itxca.spannablex.spannable
@@ -48,7 +48,6 @@ import com.yenaly.han1meviewer.util.showAlertDialog
 import com.yenaly.yenaly_libs.utils.OrientationManager
 import com.yenaly.yenaly_libs.utils.activity
 import com.yenaly.yenaly_libs.utils.appScreenWidth
-import com.yenaly.yenaly_libs.utils.dp
 import com.yenaly.yenaly_libs.utils.navBarHeight
 import com.yenaly.yenaly_libs.utils.statusBarHeight
 import com.yenaly.yenaly_libs.utils.unsafeLazy
@@ -223,6 +222,11 @@ class HJzvdStd @JvmOverloads constructor(
             }
         }
 
+    /**
+     * 是否进入了垂直全屏模式
+     */
+    private var isVerticalFullscreen = false
+
     private lateinit var tvSpeed: TextView
     private lateinit var superResolution: TextView
     private lateinit var tvKeyframe: TextView
@@ -230,6 +234,7 @@ class HJzvdStd @JvmOverloads constructor(
     private lateinit var btnGoHome: ImageView
     private lateinit var layoutTop: View
     private lateinit var layoutBottom: View
+    private lateinit var verticalFullscreen: View
 
     var hKeyframe: HKeyframeEntity? = null
         set(value) {
@@ -331,12 +336,14 @@ class HJzvdStd @JvmOverloads constructor(
         btnGoHome = findViewById(R.id.go_home)
         layoutTop = findViewById(R.id.layout_top)
         layoutBottom = findViewById(R.id.layout_bottom)
+        verticalFullscreen = findViewById(R.id.vertical_fullscreen)
         textureViewContainer.isHapticFeedbackEnabled = true
         tvSpeed.setOnClickListener(this)
         tvKeyframe.setOnClickListener(this)
         tvKeyframe.setOnLongClickListener(this)
         btnGoHome.setOnClickListener(this)
         superResolution.setOnClickListener(this)
+        verticalFullscreen.setOnClickListener(this)
     }
 
     override fun setUp(jzDataSource: JZDataSource?, screen: Int) {
@@ -506,7 +513,7 @@ class HJzvdStd @JvmOverloads constructor(
         }
     }
     override fun clickBack() {
-        Log.i(TAG, "backPress")
+        Log.i(TAG, "clickBack")
         when {
             CONTAINER_LIST.isNotEmpty() && CURRENT_JZVD != null -> { //判断条件，因为当前所有goBack都是回到普通窗口
                 CURRENT_JZVD.gotoNormalScreen()
@@ -529,6 +536,7 @@ class HJzvdStd @JvmOverloads constructor(
             R.id.super_resolution -> clickSuperResolution()
             R.id.tv_keyframe -> onKeyframeClickListener?.invoke(v)
             R.id.go_home -> onGoHomeClickListener?.invoke(v)
+            R.id.vertical_fullscreen -> clickVerticalFullscreen()
         }
     }
 
@@ -670,6 +678,18 @@ class HJzvdStd @JvmOverloads constructor(
         JZUtils.showStatusBar(jzvdContext)
         JZUtils.setRequestedOrientation(jzvdContext, NORMAL_ORIENTATION)
         JZUtils.showSystemUI(jzvdContext)
+
+        if (isVerticalFullscreen) {
+            isVerticalFullscreen = false
+
+            if (mediaInterface is MpvMediaKernel) {
+                post {
+                    // MpvMediaKernel 需要重新设置 播放界面大小
+                    (mediaInterface as MpvMediaKernel).updateSurFaceSize(width, height)
+                }
+            }
+            setActionVisibility()
+        }
     }
 
     override fun onStatePreparingChangeUrl() {
@@ -749,6 +769,16 @@ class HJzvdStd @JvmOverloads constructor(
             tvTimer.isInvisible = !match
         } ?: run { tvTimer.isInvisible = true }
     }
+    
+    override fun onPrepared() {
+        super.onPrepared()
+        if (mediaInterface is IMedia) {
+            val media = mediaInterface as IMedia
+            Log.d(TAG, "onPrepared: ${media.width}x${media.height} ${media.ratio}")
+            // 视频比例小于1时，显示垂直全屏
+            verticalFullscreen.isVisible = media.ratio < 1
+        }
+    }
 
     private fun changeUiToPreparingPlayingClear() {
         when (screen) {
@@ -815,6 +845,36 @@ class HJzvdStd @JvmOverloads constructor(
             }
         }
         popup.showAtLocation(textureViewContainer, Gravity.END, 0, 0)
+    }
+
+    fun setActionVisibility() {
+        clarity.isVisible = false
+        superResolution.isVisible = false
+        tvKeyframe.isVisible = false
+        verticalFullscreen.isVisible = !isVerticalFullscreen
+    }
+
+    fun clickVerticalFullscreen() {
+        onCLickUiToggleToClear()
+        if (isVerticalFullscreen) {
+            gotoNormalScreen()
+            return
+        }
+        FULLSCREEN_ORIENTATION = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        gotoFullscreen()
+        FULLSCREEN_ORIENTATION = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+
+        val vg = parent as ViewGroup
+        val videoPlayerView = vg.getChildAt(1)
+        // 确保 videoPlayerView 是 HJzvdStd 播放器控件
+        if (mediaInterface is MpvMediaKernel && videoPlayerView is HJzvdStd) {
+            post {
+                // MpvMediaKernel 需要重新设置 播放界面大小
+                (mediaInterface as MpvMediaKernel).updateSurFaceSize(videoPlayerView.width, videoPlayerView.height)
+                isVerticalFullscreen = true
+                setActionVisibility()
+            }
+        }
     }
 
     @SuppressLint("InflateParams")
