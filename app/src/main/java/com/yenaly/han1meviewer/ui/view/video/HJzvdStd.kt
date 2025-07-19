@@ -689,7 +689,14 @@ class HJzvdStd @JvmOverloads constructor(
                 }
             }
             setActionVisibility()
+        } else {
+            verticalFullscreen.isVisible = true
         }
+    }
+
+    override fun gotoFullscreen() {
+        super.gotoFullscreen()
+        verticalFullscreen.isVisible = false
     }
 
     override fun onStatePreparingChangeUrl() {
@@ -867,10 +874,12 @@ class HJzvdStd @JvmOverloads constructor(
         val vg = parent as ViewGroup
         val videoPlayerView = vg.getChildAt(1)
         // 确保 videoPlayerView 是 HJzvdStd 播放器控件
-        if (mediaInterface is MpvMediaKernel && videoPlayerView is HJzvdStd) {
+        if (videoPlayerView is HJzvdStd) {
             post {
                 // MpvMediaKernel 需要重新设置 播放界面大小
-                (mediaInterface as MpvMediaKernel).updateSurFaceSize(videoPlayerView.width, videoPlayerView.height)
+                if (mediaInterface is MpvMediaKernel) {
+                    (mediaInterface as MpvMediaKernel).updateSurFaceSize(videoPlayerView.width, videoPlayerView.height)
+                }
                 isVerticalFullscreen = true
                 setActionVisibility()
             }

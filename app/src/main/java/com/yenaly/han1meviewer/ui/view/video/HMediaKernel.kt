@@ -147,12 +147,12 @@ class ExoMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd), Player.Listener, HMed
         val realWidth = videoSize.width * videoSize.pixelWidthHeightRatio
         val realHeight = videoSize.height
         jzvd.onVideoSizeChanged(realWidth.toInt(), realHeight)
-        val ratio = realWidth / realHeight // > 1 橫屏， < 1 竖屏
-        if (ratio > 1) {
-            Jzvd.FULLSCREEN_ORIENTATION = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-        } else {
-            Jzvd.FULLSCREEN_ORIENTATION = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-        }
+//        val ratio = realWidth / realHeight // > 1 橫屏， < 1 竖屏
+//        if (ratio > 1) {
+//            Jzvd.FULLSCREEN_ORIENTATION = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+//        } else {
+//            Jzvd.FULLSCREEN_ORIENTATION = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+//        }
     }
 
     override fun onRenderedFirstFrame() {
@@ -343,7 +343,7 @@ class SystemMediaKernel(jzvd: Jzvd) : JZMediaSystem(jzvd), HMediaKernel, IMedia 
     override val height: Int get() = mediaPlayer?.videoHeight ?: 0
 }
 
-class MpvMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd), IMedia {
+class MpvMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd), HMediaKernel, IMedia {
     companion object {
         const val TAG = "MpvMediaKernel"
     }
