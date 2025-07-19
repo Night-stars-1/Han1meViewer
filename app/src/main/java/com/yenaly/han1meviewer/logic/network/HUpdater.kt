@@ -67,7 +67,7 @@ object HUpdater {
                 }
             } else {
                 val ver = HanimeNetwork.githubService.getLatestVersion()
-                val isNeeded = checkNeedUpdate(ver.tagName)
+                val isNeeded = checkNeedUpdate(ver.name)
                 if (isNeeded) {
                     return Latest(
                         ver.tagName, ver.body,
