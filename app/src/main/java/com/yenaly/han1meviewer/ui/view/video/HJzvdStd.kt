@@ -460,7 +460,7 @@ class HJzvdStd @JvmOverloads constructor(
 
     override fun setScreenNormal() {
         super.setScreenNormal()
-//        updateVideoPlayerSize(false)
+        updateVideoPlayerSize(false)
 
         backButton.isVisible = true
         tvSpeed.isVisible = false
@@ -478,7 +478,7 @@ class HJzvdStd @JvmOverloads constructor(
 
     override fun setScreenFullscreen() {
         super.setScreenFullscreen()
-//        updateVideoPlayerSize(true)
+        updateVideoPlayerSize(true)
 
         tvSpeed.isVisible = true
         // 非 MpvPlayer 内核不支持超分辨率
@@ -487,24 +487,23 @@ class HJzvdStd @JvmOverloads constructor(
         titleTextView.isVisible = true
         // btnGoHome.isVisible = false
 
-//        val statusBarHeight = statusBarHeight
-//        val navBarHeight = navBarHeight
-//        layoutTop.updatePadding(left = statusBarHeight, right = navBarHeight)
-//        layoutBottom.updatePadding(left = statusBarHeight, right = navBarHeight)
-//        tvTimer.updatePadding(left = statusBarHeight)
-//        bottomProgressBar.updatePadding(left = statusBarHeight, right = navBarHeight)
+        val statusBarHeight = statusBarHeight
+        val navBarHeight = navBarHeight
+        layoutTop.updatePadding(left = statusBarHeight, right = navBarHeight)
+        layoutBottom.updatePadding(left = statusBarHeight, right = navBarHeight)
+        tvTimer.updatePadding(left = statusBarHeight)
+        bottomProgressBar.updatePadding(left = statusBarHeight, right = navBarHeight)
     }
 
     /**
-     * 主动改变播放器大小，兼容华为设备无法监听`onSurfaceTextureSizeChanged`
+     * 主动改变播放器大小
      */
     private fun updateVideoPlayerSize(fullscreen: Boolean) {
-        // 仅华为设备做处理
-        if (!Platform.isHuaweiDevice) return
         if (mediaInterface is MpvMediaKernel) {
             val kernel = mediaInterface as MpvMediaKernel
             post {
                 if (fullscreen) {
+                    Log.i(TAG, "updateVideoPlayerSize: $width x $height")
                     kernel.updateSurFaceSize(width, height)
                 } else {
                     kernel.updateSurFaceSize(width, height)
@@ -679,18 +678,10 @@ class HJzvdStd @JvmOverloads constructor(
         JZUtils.setRequestedOrientation(jzvdContext, NORMAL_ORIENTATION)
         JZUtils.showSystemUI(jzvdContext)
 
+        setVerticalFullscreenVisibility()
         if (isVerticalFullscreen) {
             isVerticalFullscreen = false
-
-            if (mediaInterface is MpvMediaKernel) {
-                post {
-                    // MpvMediaKernel 需要重新设置 播放界面大小
-                    (mediaInterface as MpvMediaKernel).updateSurFaceSize(width, height)
-                }
-            }
             setActionVisibility()
-        } else {
-            verticalFullscreen.isVisible = true
         }
     }
 
@@ -776,15 +767,10 @@ class HJzvdStd @JvmOverloads constructor(
             tvTimer.isInvisible = !match
         } ?: run { tvTimer.isInvisible = true }
     }
-    
-    override fun onPrepared() {
-        super.onPrepared()
-        if (mediaInterface is IMedia) {
-            val media = mediaInterface as IMedia
-            Log.d(TAG, "onPrepared: ${media.width}x${media.height} ${media.ratio}")
-            // 视频比例小于1时，显示垂直全屏
-            verticalFullscreen.isVisible = media.ratio < 1
-        }
+
+    override fun onStatePlaying() {
+        super.onStatePlaying()
+        setVerticalFullscreenVisibility()
     }
 
     private fun changeUiToPreparingPlayingClear() {
@@ -861,6 +847,15 @@ class HJzvdStd @JvmOverloads constructor(
         verticalFullscreen.isVisible = !isVerticalFullscreen
     }
 
+    fun setVerticalFullscreenVisibility() {
+        if (mediaInterface is IMedia) {
+            val media = mediaInterface as IMedia
+            Log.d(TAG, "onPrepared: ${media.width}x${media.height} ${media.ratio}")
+            // 视频比例小于1时，显示垂直全屏
+            verticalFullscreen.isVisible = media.ratio < 1
+        }
+    }
+
     fun clickVerticalFullscreen() {
         onCLickUiToggleToClear()
         if (isVerticalFullscreen) {
@@ -870,20 +865,6 @@ class HJzvdStd @JvmOverloads constructor(
         FULLSCREEN_ORIENTATION = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         gotoFullscreen()
         FULLSCREEN_ORIENTATION = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-
-        val vg = parent as ViewGroup
-        val videoPlayerView = vg.getChildAt(1)
-        // 确保 videoPlayerView 是 HJzvdStd 播放器控件
-        if (videoPlayerView is HJzvdStd) {
-            post {
-                // MpvMediaKernel 需要重新设置 播放界面大小
-                if (mediaInterface is MpvMediaKernel) {
-                    (mediaInterface as MpvMediaKernel).updateSurFaceSize(videoPlayerView.width, videoPlayerView.height)
-                }
-                isVerticalFullscreen = true
-                setActionVisibility()
-            }
-        }
     }
 
     @SuppressLint("InflateParams")
