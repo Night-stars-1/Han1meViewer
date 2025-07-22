@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <item
+        android:id="@+id/nv_home_page"
+        android:enabled="true"
+        android:icon="@drawable/ic_baseline_home_24"
+        android:title="@string/home_page" />
+    <item
+        android:id="@+id/nv_settings"
+        android:enabled="true"
+        android:icon="@drawable/ic_baseline_settings_24"
+        android:title="@string/settings" />
+    <item
+        android:id="@+id/nv_h_keyframe_settings"
+        android:enabled="true"
+        android:icon="@drawable/baseline_h_24"
+        android:title="@string/h_keyframe_settings" />
+
+    <item
+        android:id="@+id/alarms"
+        android:title="@string/my_list">
+        <menu>
+            <item
+                android:id="@+id/nv_watch_later"
+                android:enabled="true"
+                android:icon="@drawable/ic_baseline_watch_later_24"
+                android:title="@string/watch_later" />
+            <item
+                android:id="@+id/nv_fav_video"
+                android:enabled="true"
+                android:icon="@drawable/ic_baseline_favorite_24"
+                android:title="@string/fav_video" />
+            <item
+                android:id="@+id/nv_playlist"
+                android:enabled="true"
+                android:icon="@drawable/ic_baseline_list_24"
+                android:title="@string/play_list" />
+        </menu>
+    </item>
+
+    <item android:title="@string/video">
+        <menu>
+            <item
+                android:id="@+id/nv_watch_history"
+                android:enabled="true"
+                android:icon="@drawable/ic_baseline_history_24"
+                android:title="@string/watch_history" />
+            <item
+                android:id="@+id/nv_download"
+                android:enabled="true"
+                android:icon="@drawable/ic_baseline_download_24"
+                android:title="@string/download" />
+        </menu>
+    </item>
+</menu>

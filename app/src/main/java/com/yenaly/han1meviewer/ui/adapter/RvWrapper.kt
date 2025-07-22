@@ -1,15 +1,21 @@
 package com.yenaly.han1meviewer.ui.adapter
 
 import android.content.Context
+import android.graphics.Outline
+import android.view.View
 import android.view.ViewGroup
+import android.view.ViewOutlineProvider
+import androidx.annotation.StringRes
 import androidx.core.view.minusAssign
 import androidx.core.view.plusAssign
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.LayoutManager
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.chad.library.adapter4.BaseSingleItemAdapter
 import com.chad.library.adapter4.viewholder.QuickViewHolder
 import com.yenaly.han1meviewer.R
+import com.yenaly.han1meviewer.util.dpToPx
 
 /**
  * RecyclerView Wrapper，为了让多 LayoutManager 布局能够在 ConcatAdapter 中使用。
@@ -65,6 +71,12 @@ class RvWrapper<VH : ViewHolder>(
                 this@wr.adapter = this@RvWrapper.adapter
                 this@RvWrapper.wrapper = this@wr
                 onWrap?.invoke(this@wr)
+                outlineProvider = object : ViewOutlineProvider() {
+                    override fun getOutline(view: View, outline: Outline) {
+                        outline.setRoundRect(0, 0, view.width, view.height, 8f.dpToPx())
+                    }
+                }
+                clipToOutline = true
             }
         }
     }

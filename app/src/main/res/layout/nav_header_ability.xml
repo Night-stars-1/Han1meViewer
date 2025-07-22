@@ -1,26 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:paddingBottom="36dp"
     tools:ignore="UseCompoundDrawables">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:gravity="center_horizontal"
+        android:paddingBottom="16dp">
+        <ImageView
+            android:id="@+id/collapse"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:contentDescription="@string/collapse"
+            app:srcCompat="@drawable/menu_24px" />
+    </LinearLayout>
 
     <ImageView
         android:id="@+id/header_avatar"
-        android:layout_width="@dimen/main_avatar_size"
-        android:layout_height="@dimen/main_avatar_size"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="16dp"
+        android:layout_width="@dimen/main_expanded_avatar_size"
+        android:layout_height="@dimen/main_expanded_avatar_size"
         android:contentDescription="@null" />
 
     <TextView
         android:id="@+id/header_username"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
         android:textSize="16sp" />
 
 </LinearLayout>

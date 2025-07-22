@@ -377,7 +377,7 @@ class PreviewActivity : YenalyActivity<ActivityPreviewBinding>() {
     }
 
     private fun handleHeaderPalette(p: Palette) {
-        val colorPrimary = getThemeColor(com.google.android.material.R.attr.colorPrimary)
+        val colorPrimary = getThemeColor(com.google.android.material.R.attr.colorPrimaryFixed)
         val lightVibrant = p.getLightVibrantColor(colorPrimary)
         val per70lightVibrantStateList =
             ColorUtils.setAlphaComponent(lightVibrant, 0xB3).toColorStateList()

@@ -27,7 +27,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.ui.onNavDestinationSelected
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.ConcatAdapter
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.GridLayoutManager
 import coil.load
 import com.yenaly.han1meviewer.ADVANCED_SEARCH_MAP
 import com.yenaly.han1meviewer.AdvancedSearchMap
@@ -43,13 +43,14 @@ import com.yenaly.han1meviewer.ui.activity.MainActivity
 import com.yenaly.han1meviewer.ui.activity.PreviewActivity
 import com.yenaly.han1meviewer.ui.activity.SearchActivity
 import com.yenaly.han1meviewer.ui.activity.VideoActivity
+import com.yenaly.han1meviewer.ui.adapter.HRvItemAdapter.Companion.withTitleSection
 import com.yenaly.han1meviewer.ui.adapter.HanimeVideoRvAdapter
-import com.yenaly.han1meviewer.ui.adapter.RvWrapper.Companion.wrappedWith
-import com.yenaly.han1meviewer.ui.adapter.VideoColumnTitleAdapter
 import com.yenaly.han1meviewer.ui.fragment.IToolbarFragment
 import com.yenaly.han1meviewer.ui.viewmodel.MainViewModel
+import com.yenaly.han1meviewer.util.GridSpacingDecoration
 import com.yenaly.han1meviewer.util.addUpdateListener
 import com.yenaly.han1meviewer.util.colorTransition
+import com.yenaly.han1meviewer.util.dpToPx
 import com.yenaly.yenaly_libs.base.YenalyFragment
 import com.yenaly.yenaly_libs.utils.startActivity
 import kotlinx.coroutines.launch
@@ -78,80 +79,31 @@ class HomePageFragment : YenalyFragment<FragmentHomePageBinding>(),
     private val hotHanimeMonthlyAdapter = HanimeVideoRvAdapter()
 
     private val concatAdapter = ConcatAdapter(
-        VideoColumnTitleAdapter(R.string.latest_hanime).apply {
-            onMoreHanimeListener = {
-                toSearchActivity(advancedSearchMapOf(HAdvancedSearch.GENRE to "裏番"))
-            }
+        latestHanimeAdapter.withTitleSection(R.string.latest_hanime) {
+            toSearchActivity(advancedSearchMapOf(HAdvancedSearch.GENRE to "裏番"))
         },
-        latestHanimeAdapter.wrappedWith {
-            LinearLayoutManager(
-                context, LinearLayoutManager.HORIZONTAL, false
-            )
+        latestReleaseAdapter.withTitleSection(R.string.latest_release) {
+            toSearchActivity(advancedSearchMapOf(HAdvancedSearch.SORT to "最新上市"))
         },
-        VideoColumnTitleAdapter(R.string.latest_release).apply {
-            onMoreHanimeListener = {
-                toSearchActivity(advancedSearchMapOf(HAdvancedSearch.SORT to "最新上市"))
-            }
+        latestUploadAdapter.withTitleSection(R.string.latest_upload) {
+            toSearchActivity(advancedSearchMapOf(HAdvancedSearch.SORT to "最新上傳"))
         },
-        latestReleaseAdapter.wrappedWith {
-            LinearLayoutManager(
-                context, LinearLayoutManager.HORIZONTAL, false
-            )
-        },
-        VideoColumnTitleAdapter(R.string.latest_upload).apply {
-            onMoreHanimeListener = {
-                toSearchActivity(advancedSearchMapOf(HAdvancedSearch.SORT to "最新上傳"))
-            }
-        },
-        latestUploadAdapter.wrappedWith {
-            LinearLayoutManager(
-                context, LinearLayoutManager.HORIZONTAL, false
-            )
-        },
-        VideoColumnTitleAdapter(R.string.chinese_subtitle).apply {
-            onMoreHanimeListener = {
-                toSearchActivity(
-                    advancedSearchMapOf(
-                        HAdvancedSearch.TAGS to hashMapOf<Int, Any>(R.string.video_attr to "中文字幕"),
-                        HAdvancedSearch.SORT to "最新上傳"
-                    )
+        chineseSubtitleAdapter.withTitleSection(R.string.chinese_subtitle) {
+            toSearchActivity(
+                advancedSearchMapOf(
+                    HAdvancedSearch.TAGS to hashMapOf<Int, Any>(R.string.video_attr to "中文字幕"),
+                    HAdvancedSearch.SORT to "最新上傳"
                 )
-            }
-        },
-        chineseSubtitleAdapter.wrappedWith {
-            LinearLayoutManager(
-                context, LinearLayoutManager.HORIZONTAL, false
             )
         },
-        VideoColumnTitleAdapter(R.string.they_watched).apply {
-            onMoreHanimeListener = {
-                toSearchActivity(advancedSearchMapOf(HAdvancedSearch.SORT to "他們在看"))
-            }
+        hanimeTheyWatchedAdapter.withTitleSection(R.string.they_watched) {
+            toSearchActivity(advancedSearchMapOf(HAdvancedSearch.SORT to "他們在看"))
         },
-        hanimeTheyWatchedAdapter.wrappedWith {
-            LinearLayoutManager(
-                context, LinearLayoutManager.HORIZONTAL, false
-            )
+        hanimeCurrentAdapter.withTitleSection(R.string.ranking_today) {
+            toSearchActivity(advancedSearchMapOf(HAdvancedSearch.SORT to "本日排行"))
         },
-        VideoColumnTitleAdapter(R.string.ranking_today).apply {
-            onMoreHanimeListener = {
-                toSearchActivity(advancedSearchMapOf(HAdvancedSearch.SORT to "本日排行"))
-            }
-        },
-        hanimeCurrentAdapter.wrappedWith {
-            LinearLayoutManager(
-                context, LinearLayoutManager.HORIZONTAL, false
-            )
-        },
-        VideoColumnTitleAdapter(R.string.ranking_this_month).apply {
-            onMoreHanimeListener = {
-                toSearchActivity(advancedSearchMapOf(HAdvancedSearch.SORT to "本月排行"))
-            }
-        },
-        hotHanimeMonthlyAdapter.wrappedWith {
-            LinearLayoutManager(
-                context, LinearLayoutManager.HORIZONTAL, false
-            )
+        hotHanimeMonthlyAdapter.withTitleSection(R.string.ranking_this_month) {
+            toSearchActivity(advancedSearchMapOf(HAdvancedSearch.SORT to "本月排行"))
         }
     )
 
@@ -179,9 +131,25 @@ class HomePageFragment : YenalyFragment<FragmentHomePageBinding>(),
             easterEgg()
         }
 
-        binding.rv.layoutManager = LinearLayoutManager(context)
         binding.rv.adapter = concatAdapter
         binding.rv.clipToPadding = false
+        if (binding.rv.layoutManager is GridLayoutManager) {
+            (binding.rv.layoutManager as GridLayoutManager).spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+                override fun getSpanSize(position: Int): Int {
+                    return if (position == 0) 2 else 1
+                }
+            }
+            binding.rv.addItemDecoration(
+                GridSpacingDecoration(
+                    spanCount = 2,
+                    spacing = 16.dpToPx(),
+                    start = 1,
+                    includeEdge = false
+                )
+            )
+        }
+
+
         ViewCompat.setOnApplyWindowInsetsListener(binding.rv) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
             v.updatePadding(bottom = systemBars.bottom)

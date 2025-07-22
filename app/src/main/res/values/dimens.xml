@@ -25,4 +25,5 @@
     <dimen name="video_view_and_time_and_duration">12sp</dimen>
     <dimen name="err_tip_text_size">24sp</dimen>
     <dimen name="main_avatar_size">48dp</dimen>
+    <dimen name="main_expanded_avatar_size">90dp</dimen>
 </resources>

@@ -25,40 +25,40 @@ class RecyclerViewAtViewPager2 : RecyclerView {
 
     private var startX = 0
     private var startY = 0
-    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
-        when (ev.action) {
-            MotionEvent.ACTION_DOWN -> {
-                startX = ev.x.toInt()
-                startY = ev.y.toInt()
-                parent.requestDisallowInterceptTouchEvent(true)
-            }
-
-            MotionEvent.ACTION_MOVE -> {
-                val endX = ev.x.toInt()
-                val endY = ev.y.toInt()
-                val disX = abs(endX - startX)
-                val disY = abs(endY - startY)
-                if (disX > disY) {
-                    //为了解决RecyclerView嵌套RecyclerView时横向滑动的问题
-                    if (disallowIntercept) {
-                        parent.requestDisallowInterceptTouchEvent(disallowIntercept)
-                    } else {
-                        parent.requestDisallowInterceptTouchEvent(canScrollHorizontally(startX - endX))
-                    }
-                } else {
-                    parent.requestDisallowInterceptTouchEvent(false)
-                }
-            }
-
-            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                parent.requestDisallowInterceptTouchEvent(false)
-            }
-        }
-        return super.dispatchTouchEvent(ev)
-    }
-
-    override fun requestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {
-        this.disallowIntercept = disallowIntercept
-        super.requestDisallowInterceptTouchEvent(disallowIntercept)
-    }
+//    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+//        when (ev.action) {
+//            MotionEvent.ACTION_DOWN -> {
+//                startX = ev.x.toInt()
+//                startY = ev.y.toInt()
+//                parent.requestDisallowInterceptTouchEvent(true)
+//            }
+//
+//            MotionEvent.ACTION_MOVE -> {
+//                val endX = ev.x.toInt()
+//                val endY = ev.y.toInt()
+//                val disX = abs(endX - startX)
+//                val disY = abs(endY - startY)
+//                if (disX > disY) {
+//                    //为了解决RecyclerView嵌套RecyclerView时横向滑动的问题
+//                    if (disallowIntercept) {
+//                        parent.requestDisallowInterceptTouchEvent(disallowIntercept)
+//                    } else {
+//                        parent.requestDisallowInterceptTouchEvent(canScrollHorizontally(startX - endX))
+//                    }
+//                } else {
+//                    parent.requestDisallowInterceptTouchEvent(false)
+//                }
+//            }
+//
+//            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+//                parent.requestDisallowInterceptTouchEvent(false)
+//            }
+//        }
+//        return super.dispatchTouchEvent(ev)
+//    }
+//
+//    override fun requestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {
+//        this.disallowIntercept = disallowIntercept
+//        super.requestDisallowInterceptTouchEvent(disallowIntercept)
+//    }
 }

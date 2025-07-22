@@ -460,7 +460,7 @@ class HJzvdStd @JvmOverloads constructor(
 
     override fun setScreenNormal() {
         super.setScreenNormal()
-        updateVideoPlayerSize(false)
+//        updateVideoPlayerSize(false)
 
         backButton.isVisible = true
         tvSpeed.isVisible = false
@@ -478,7 +478,7 @@ class HJzvdStd @JvmOverloads constructor(
 
     override fun setScreenFullscreen() {
         super.setScreenFullscreen()
-        updateVideoPlayerSize(true)
+//        updateVideoPlayerSize(true)
 
         tvSpeed.isVisible = true
         // 非 MpvPlayer 内核不支持超分辨率
@@ -487,12 +487,12 @@ class HJzvdStd @JvmOverloads constructor(
         titleTextView.isVisible = true
         // btnGoHome.isVisible = false
 
-        val statusBarHeight = statusBarHeight
-        val navBarHeight = navBarHeight
-        layoutTop.updatePadding(left = statusBarHeight, right = navBarHeight)
-        layoutBottom.updatePadding(left = statusBarHeight, right = navBarHeight)
-        tvTimer.updatePadding(left = statusBarHeight)
-        bottomProgressBar.updatePadding(left = statusBarHeight, right = navBarHeight)
+//        val statusBarHeight = statusBarHeight
+//        val navBarHeight = navBarHeight
+//        layoutTop.updatePadding(left = statusBarHeight, right = navBarHeight)
+//        layoutBottom.updatePadding(left = statusBarHeight, right = navBarHeight)
+//        tvTimer.updatePadding(left = statusBarHeight)
+//        bottomProgressBar.updatePadding(left = statusBarHeight, right = navBarHeight)
     }
 
     /**

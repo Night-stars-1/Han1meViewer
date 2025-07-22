@@ -7,6 +7,7 @@ import android.graphics.RenderEffect
 import android.graphics.Shader
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
@@ -18,6 +19,9 @@ import androidx.activity.viewModels
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isVisible
+import androidx.customview.widget.Openable
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.drawerlayout.widget.DrawerLayout.DrawerListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
@@ -29,6 +33,9 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupWithNavController
 import coil.load
 import coil.transform.CircleCropTransformation
+import com.google.android.material.navigation.NavigationBarView.ACTIVE_INDICATOR_WIDTH_MATCH_PARENT
+import com.google.android.material.navigation.NavigationView
+import com.google.android.material.navigationrail.NavigationRailView
 import com.google.android.material.snackbar.Snackbar
 import com.yenaly.han1meviewer.Preferences
 import com.yenaly.han1meviewer.Preferences.isAlreadyLogin
@@ -41,6 +48,7 @@ import com.yenaly.han1meviewer.logic.state.WebsiteState
 import com.yenaly.han1meviewer.logout
 import com.yenaly.han1meviewer.ui.viewmodel.AppViewModel
 import com.yenaly.han1meviewer.ui.viewmodel.MainViewModel
+import com.yenaly.han1meviewer.util.dpToPx
 import com.yenaly.han1meviewer.util.logScreenViewEvent
 import com.yenaly.han1meviewer.util.showAlertDialog
 import com.yenaly.han1meviewer.util.showUpdateDialog
@@ -99,8 +107,17 @@ class MainActivity : YenalyActivity<ActivityMainBinding>(), DrawerListener {
         navHostFragment =
             supportFragmentManager.findFragmentById(R.id.fcv_main) as NavHostFragment
         navController = navHostFragment.navController
-        binding.nvMain.setupWithNavController(navController)
-        binding.dlMain.addDrawerListener(this)
+        if (binding.nvMain is NavigationView) {
+            (binding.nvMain as NavigationView).setupWithNavController(navController)
+        }
+        if (binding.nvMain is NavigationRailView) {
+            val nvMain = binding.nvMain as NavigationRailView
+            nvMain.labelVisibilityMode = NavigationRailView.LABEL_VISIBILITY_LABELED
+            nvMain.itemActiveIndicatorExpandedWidth = ACTIVE_INDICATOR_WIDTH_MATCH_PARENT
+        }
+        if (binding.dlMain is DrawerLayout) {
+            (binding.dlMain as DrawerLayout).addDrawerListener(this)
+        }
 
         initHeaderView()
         initNavActivity()
@@ -149,7 +166,7 @@ class MainActivity : YenalyActivity<ActivityMainBinding>(), DrawerListener {
             }
         }
 
-        binding.nvMain.getHeaderView(0)?.let { header ->
+        fun setAvatar(header: View) {
             val headerAvatar = header.findViewById<ImageView>(R.id.header_avatar)
             val headerUsername = header.findViewById<TextView>(R.id.header_username)
             lifecycleScope.launch {
@@ -182,6 +199,21 @@ class MainActivity : YenalyActivity<ActivityMainBinding>(), DrawerListener {
                         }
                     }
                 }
+            }
+        }
+        if (binding.nvMain is NavigationView) {
+            (binding.nvMain as NavigationView).getHeaderView(0)?.let { header ->
+                setAvatar(header)
+                val collapse = header.findViewById<ImageView>(R.id.collapse)
+                collapse.isVisible = false
+            }
+        }
+        if (binding.nvMain is NavigationRailView) {
+            val nvMain = binding.nvMain as NavigationRailView
+            nvMain.headerView?.let { header ->
+                val headerAvatar = header.findViewById<ImageView>(R.id.header_avatar)
+                setAvatar(header)
+                setHeaderAvatarSize(headerAvatar, false)
             }
         }
     }
@@ -226,9 +258,25 @@ class MainActivity : YenalyActivity<ActivityMainBinding>(), DrawerListener {
         }
     }
 
+    fun setHeaderAvatarSize(headerAvatar: ImageView, isExpanded: Boolean) {
+        if (isExpanded) {
+            val widthInPx = resources.getDimensionPixelSize(R.dimen.main_expanded_avatar_size)
+            val params = headerAvatar.layoutParams
+            params.width = widthInPx
+            params.height = widthInPx
+            headerAvatar.layoutParams = params
+        } else {
+            val widthInPx = resources.getDimensionPixelSize(R.dimen.main_avatar_size)
+            val params = headerAvatar.layoutParams
+            params.width = widthInPx
+            params.height = widthInPx
+            headerAvatar.layoutParams = params
+        }
+    }
+
     @SuppressLint("SetTextI18n")
     private fun initHeaderView() {
-        binding.nvMain.getHeaderView(0)?.let { view ->
+        fun setAvatar(view: View) {
             val headerAvatar = view.findViewById<ImageView>(R.id.header_avatar)
             val headerUsername = view.findViewById<TextView>(R.id.header_username)
             if (isAlreadyLogin) {
@@ -252,11 +300,47 @@ class MainActivity : YenalyActivity<ActivityMainBinding>(), DrawerListener {
                 }
             }
         }
+        if (binding.nvMain is NavigationView) {
+            (binding.nvMain as NavigationView).getHeaderView(0)?.let { view ->
+                setAvatar(view)
+            }
+        }
+        if (binding.nvMain is NavigationRailView) {
+            val nvMain = (binding.nvMain as NavigationRailView)
+            nvMain.headerView?.let { view ->
+                setAvatar(view)
+
+                val collapse = view.findViewById<ImageView>(R.id.collapse)
+                val headerAvatar = view.findViewById<ImageView>(R.id.header_avatar)
+                collapse.setOnClickListener {
+                    setHeaderAvatarSize(headerAvatar, !nvMain.isExpanded)
+                    if (nvMain.isExpanded) {
+                        nvMain.collapse()
+                        val params = nvMain.layoutParams
+                        params.width = 80.dpToPx()
+                        nvMain.layoutParams = params
+                    } else {
+                        nvMain.expand()
+                        val params = nvMain.layoutParams
+                        params.width = 300.dpToPx()
+                        nvMain.layoutParams = params
+                    }
+                }
+            }
+        }
     }
 
     // #issue-225: 侧滑选单双重点击异常，不能从 xml 里直接定义 activity 块，需要在代码里初始化
     private fun initNavActivity() {
-        binding.nvMain.menu.apply {
+        val menu = when (binding.nvMain) {
+            is NavigationView -> {
+                (binding.nvMain as NavigationView).menu
+            }
+            else -> {
+                (binding.nvMain as NavigationRailView).menu
+            }
+        }
+        menu.apply {
             findItem(R.id.nv_settings).setOnMenuItemClickListener {
                 SettingsRouter.with(navController).toSettingsActivity()
                 return@setOnMenuItemClickListener false
@@ -281,13 +365,21 @@ class MainActivity : YenalyActivity<ActivityMainBinding>(), DrawerListener {
         intArrayOf(R.id.nv_fav_video, R.id.nv_watch_later, R.id.nv_playlist)
 
     private fun initMenu() {
+        val menu = when (binding.nvMain) {
+            is NavigationView -> {
+                (binding.nvMain as NavigationView).menu
+            }
+            else -> {
+                (binding.nvMain as NavigationRailView).menu
+            }
+        }
         if (isAlreadyLogin) {
             loginNeededFragmentList.forEach {
-                binding.nvMain.menu.findItem(it).setOnMenuItemClickListener(null)
+                menu.findItem(it).setOnMenuItemClickListener(null)
             }
         } else {
             loginNeededFragmentList.forEach {
-                binding.nvMain.menu.findItem(it).setOnMenuItemClickListener {
+                menu.findItem(it).setOnMenuItemClickListener {
                     showShortToast(R.string.login_first)
                     return@setOnMenuItemClickListener false
                 }
@@ -313,7 +405,11 @@ class MainActivity : YenalyActivity<ActivityMainBinding>(), DrawerListener {
      */
     fun Toolbar.setupWithMainNavController() {
         supportActionBar!!.title = hanimeSpannedTitle
-        val appBarConfiguration = AppBarConfiguration(setOf(R.id.nv_home_page), binding.dlMain)
-        this.setupWithNavController(navController, appBarConfiguration)
+        if (binding.dlMain is DrawerLayout) {
+            val appBarConfiguration = AppBarConfiguration(setOf(R.id.nv_home_page),
+                binding.dlMain as Openable?
+            )
+            this.setupWithNavController(navController, appBarConfiguration)
+        }
     }
 }
