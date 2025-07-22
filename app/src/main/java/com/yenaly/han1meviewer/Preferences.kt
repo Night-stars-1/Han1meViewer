@@ -126,6 +126,9 @@ object Preferences {
     val useBuiltInHosts: Boolean
         get() = preferenceSp.getBoolean(NetworkSettingsFragment.USE_BUILT_IN_HOSTS, false)
 
+    val isPingTest: Boolean
+        get() = preferenceSp.getBoolean(NetworkSettingsFragment.PING_TEST, false)
+
     val isPipAllowed: Boolean
         get() = preferenceSp.getBoolean(HomeSettingsFragment.ALLOW_PIP, false) && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
 

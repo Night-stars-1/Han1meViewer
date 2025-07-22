@@ -174,7 +174,7 @@
     <string name="domain_name">Domain Name</string>
     <string name="use_built_in_hosts">Use Built-in Hosts</string>
     <string name="network_settings">Network Settings</string>
-    <string name="use_built_in_hosts_summary">Mapping of hosts to IP provided by the app\nVPN? What\'s that?</string>
+    <string name="use_built_in_hosts_summary">Mapping of hosts to IP provided by the app\nNot in Chinese mainland, you don\'t need to turn on this option</string>
     <string name="username">Username</string>
     <string name="password">Password</string>
     <string name="try_login_here">Try logging in here</string>
@@ -364,5 +364,8 @@ Recommendations are as follows:\n
     <string name="year">year</string>
     <string name="month">month</string>
     <string name="day">day</string>
+    <string name="ping_test">The speed is being measured, please wait patiently!</string>
+    <string name="use_ping_test">Whether to measure speed</string>
+    <string name="use_ping_test_summary">Whether to measure the speed of the built-in HOST when the application starts, and choose the fastest one.</string>
 
 </resources>

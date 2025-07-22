@@ -179,7 +179,7 @@
     <string name="domain_name">域名</string>
     <string name="use_built_in_hosts">應用內建 Hosts</string>
     <string name="network_settings">網路設定</string>
-    <string name="use_built_in_hosts_summary">應用提供的主機到 IP 的映射\nVPN？那是什麼？</string>
+    <string name="use_built_in_hosts_summary">應用提供的主機到 IP 的映射\n不在中國大陸，無需開啟該選項</string>
     <string name="username">帳號</string>
     <string name="password">密碼</string>
     <string name="try_login_here">試試在這裡登入</string>
@@ -374,5 +374,8 @@
     <string name="year">年</string>
     <string name="month">月</string>
     <string name="day">日</string>
+    <string name="ping_test">正在測速，請耐心等待！</string>
+    <string name="use_ping_test">是否測速</string>
+    <string name="use_ping_test_summary">是否在應用啟動時對內置HOST進行測速，選擇速度最快的。</string>
 
 </resources>

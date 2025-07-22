@@ -370,5 +370,8 @@
     <string name="year">年</string>
     <string name="month">月</string>
     <string name="day">日</string>
+    <string name="ping_test">正在测速，请耐心等待！</string>
+    <string name="use_ping_test">是否测速</string>
+    <string name="use_ping_test_summary">是否在应用启动时对内置HOST进行测速，选择速度最快的。</string>
 
 </resources>

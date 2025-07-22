@@ -17,4 +17,10 @@
         app:summary="@string/use_built_in_hosts_summary"
         app:title="@string/use_built_in_hosts" />
 
+    <com.yenaly.yenaly_libs.base.preference.MaterialSwitchPreference
+        app:iconSpaceReserved="false"
+        app:key="ping_test"
+        app:summary="@string/use_ping_test_summary"
+        app:title="@string/use_ping_test" />
+
 </PreferenceScreen>
