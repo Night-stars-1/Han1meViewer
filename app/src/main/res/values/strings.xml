@@ -378,5 +378,6 @@
     <string name="use_ping_test">是否測速</string>
     <string name="use_ping_test_summary">是否在應用啟動時對內置HOST進行測速，選擇速度最快的。</string>
     <string name="external_playback">外部觀看</string>
+    <string name="use_private_directory">使用私有目錄</string>
 
 </resources>

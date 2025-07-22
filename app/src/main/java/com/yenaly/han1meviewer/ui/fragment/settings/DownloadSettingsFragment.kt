@@ -1,19 +1,27 @@
 package com.yenaly.han1meviewer.ui.fragment.settings
 
 import android.os.Bundle
+import android.util.Log
 import androidx.preference.SeekBarPreference
 import com.yenaly.han1meviewer.HFileManager
+import com.yenaly.han1meviewer.HFileManager.appDownloadFolder
+import com.yenaly.han1meviewer.HFileManager.appExternalDownloadFolder
+import com.yenaly.han1meviewer.HFileManager.getDownloadFolder
+import com.yenaly.han1meviewer.Preferences
 import com.yenaly.han1meviewer.R
 import com.yenaly.han1meviewer.logic.network.interceptor.SpeedLimitInterceptor
 import com.yenaly.han1meviewer.ui.activity.SettingsActivity
 import com.yenaly.han1meviewer.ui.fragment.IToolbarFragment
+import com.yenaly.han1meviewer.ui.fragment.settings.NetworkSettingsFragment.Companion.USE_BUILT_IN_HOSTS
 import com.yenaly.han1meviewer.util.setSummaryConverter
 import com.yenaly.han1meviewer.util.showAlertDialog
 import com.yenaly.han1meviewer.worker.HanimeDownloadManagerV2
 import com.yenaly.yenaly_libs.base.preference.LongClickablePreference
+import com.yenaly.yenaly_libs.base.preference.MaterialSwitchPreference
 import com.yenaly.yenaly_libs.base.settings.YenalySettingsFragment
 import com.yenaly.yenaly_libs.utils.copyToClipboard
 import com.yenaly.yenaly_libs.utils.formatBytesPerSecond
+import com.yenaly.yenaly_libs.utils.mapToArray
 import com.yenaly.yenaly_libs.utils.showShortToast
 
 class DownloadSettingsFragment : YenalySettingsFragment(R.xml.settings_download),
@@ -23,6 +31,7 @@ class DownloadSettingsFragment : YenalySettingsFragment(R.xml.settings_download)
         const val DOWNLOAD_PATH = "download_path"
         const val DOWNLOAD_COUNT_LIMIT = "download_count_limit"
         const val DOWNLOAD_SPEED_LIMIT = "download_speed_limit"
+        const val USE_PRIVATE_DIRECTORY = "use_private_directory"
     }
 
     private val downloadPath
@@ -32,6 +41,9 @@ class DownloadSettingsFragment : YenalySettingsFragment(R.xml.settings_download)
     private val downloadSpeedLimit
             by safePreference<SeekBarPreference>(DOWNLOAD_SPEED_LIMIT)
 
+    private val usePrivateDirectory
+            by safePreference<MaterialSwitchPreference>(USE_PRIVATE_DIRECTORY)
+
     override fun onStart() {
         super.onStart()
         (activity as SettingsActivity).setupToolbar()
@@ -39,7 +51,7 @@ class DownloadSettingsFragment : YenalySettingsFragment(R.xml.settings_download)
 
     override fun onPreferencesCreated(savedInstanceState: Bundle?) {
         downloadPath.apply {
-            val path = HFileManager.appDownloadFolder.path
+            val path = getDownloadFolder().path
             summary = path
             setOnPreferenceClickListener {
                 requireContext().showAlertDialog {
@@ -50,6 +62,7 @@ class DownloadSettingsFragment : YenalySettingsFragment(R.xml.settings_download)
                     )
                     setPositiveButton(R.string.ok, null)
                 }
+
                 return@setOnPreferenceClickListener true
             }
             setOnPreferenceLongClickListener {
@@ -73,6 +86,11 @@ class DownloadSettingsFragment : YenalySettingsFragment(R.xml.settings_download)
             setSummaryConverter(defValue = SpeedLimitInterceptor.NO_LIMIT_INDEX, converter = { i ->
                 SpeedLimitInterceptor.SPEED_BYTES[i].toDownloadSpeedPrettyString()
             })
+        }
+        usePrivateDirectory.setOnPreferenceChangeListener { _, newValue ->
+            val usePrivate = newValue as Boolean
+            downloadPath.summary = if (usePrivate) appDownloadFolder.path else appExternalDownloadFolder.path
+            return@setOnPreferenceChangeListener true
         }
     }
 

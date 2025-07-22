@@ -203,4 +203,10 @@ object Preferences {
             )
             return SpeedLimitInterceptor.SPEED_BYTES[index]
         }
+
+    val isPrivateDirectory: Boolean
+        get() = preferenceSp.getBoolean(
+            DownloadSettingsFragment.USE_PRIVATE_DIRECTORY,
+            false
+        )
 }

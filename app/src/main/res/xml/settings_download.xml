@@ -22,4 +22,9 @@
         app:title="@string/download_speed_limit"
         app:updatesContinuously="true" />
 
+    <com.yenaly.yenaly_libs.base.preference.MaterialSwitchPreference
+        app:iconSpaceReserved="false"
+        app:key="use_private_directory"
+        app:title="@string/use_private_directory" />
+
 </androidx.preference.PreferenceScreen>

@@ -43,7 +43,11 @@ object HCacheManager {
             val entity = DatabaseRepo.HanimeDownload.find(videoCode)
             if (entity != null) {
                 val folder = HFileManager.getDownloadVideoFolder(videoCode)
-                val cacheFile = File(folder, CACHE_INFO_FILE)
+                var cacheFile = File(folder, CACHE_INFO_FILE)
+                if (!cacheFile.exists()) {
+                    val folder = HFileManager.getDownloadVideoFolder(videoCode, true)
+                    cacheFile = File(folder, CACHE_INFO_FILE)
+                }
                 val info = kotlin.runCatching {
                     if (cacheFile.exists()) HJson.decodeFromStream<HanimeVideo?>(cacheFile.inputStream()) else null
                 }.getOrNull()

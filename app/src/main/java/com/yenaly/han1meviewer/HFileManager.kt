@@ -1,6 +1,7 @@
 package com.yenaly.han1meviewer
 
 import android.os.Environment
+import com.yenaly.yenaly_libs.utils.applicationContext
 import com.yenaly.yenaly_libs.utils.makeFolderNoMedia
 import java.io.File
 
@@ -10,9 +11,15 @@ object HFileManager {
 
     private val illegalCharsRegex = Regex("""["*/:<>?\\|\x00-\x1F\x7F]""")
 
-    val appDownloadFolder: File
+    val appExternalDownloadFolder: File
         get() = File(
             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+            APP_NAME
+        ).also { file -> file.makeFolderNoMedia() }
+
+    val appDownloadFolder: File
+        get() = File(
+            applicationContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),
             APP_NAME
         ).also { file -> file.makeFolderNoMedia() }
 
@@ -27,7 +34,16 @@ object HFileManager {
         title: String, suffix: String = DEF_VIDEO_COVER_TYPE
     ) = "${title.replaceAllIllegalChars()}.${suffix}"
 
-    fun getDownloadVideoFolder(videoCode: String): File {
+    fun getDownloadFolder(again: Boolean = false): File {
+        return if (again) {
+            if (!Preferences.isPrivateDirectory) appDownloadFolder else appExternalDownloadFolder
+        } else {
+            if (Preferences.isPrivateDirectory) appDownloadFolder else appExternalDownloadFolder
+        }
+    }
+
+    fun getDownloadVideoFolder(videoCode: String, again: Boolean = false): File {
+        val appDownloadFolder = getDownloadFolder(again)
         return File(appDownloadFolder, "$HANIME_DOWNLOAD_FOLDER/$videoCode")
     }
 
