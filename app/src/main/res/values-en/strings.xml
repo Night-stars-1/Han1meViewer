@@ -367,5 +367,6 @@ Recommendations are as follows:\n
     <string name="ping_test">The speed is being measured, please wait patiently!</string>
     <string name="use_ping_test">Whether to measure speed</string>
     <string name="use_ping_test_summary">Whether to measure the speed of the built-in HOST when the application starts, and choose the fastest one.</string>
+    <string name="external_playback">External Playback</string>
 
 </resources>

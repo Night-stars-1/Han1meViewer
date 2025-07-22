@@ -21,6 +21,7 @@ import com.yenaly.han1meviewer.logic.entity.download.VideoWithCategories
 import com.yenaly.han1meviewer.ui.activity.VideoActivity
 import com.yenaly.han1meviewer.ui.fragment.home.download.DownloadedFragment
 import com.yenaly.han1meviewer.util.HImageMeower.loadUnhappily
+import com.yenaly.han1meviewer.util.MediaUtils
 import com.yenaly.han1meviewer.util.openDownloadedHanimeVideoInActivity
 import com.yenaly.han1meviewer.util.showAlertDialog
 import com.yenaly.yenaly_libs.utils.activity
@@ -162,6 +163,11 @@ class HanimeDownloadedRvAdapter(private val fragment: DownloadedFragment) :
 //                    }
 //                })
                 context.openDownloadedHanimeVideoInActivity(item.video.videoCode)
+            }
+            viewHolder.binding.btnExternalPlayback.setOnClickListener {
+                val position = viewHolder.bindingAdapterPosition
+                val item = getItem(position) ?: return@setOnClickListener
+                MediaUtils.playMedia(context, item.video.videoUri)
             }
         }
     }

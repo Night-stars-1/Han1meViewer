@@ -503,7 +503,6 @@ class HJzvdStd @JvmOverloads constructor(
             val kernel = mediaInterface as MpvMediaKernel
             post {
                 if (fullscreen) {
-                    Log.i(TAG, "updateVideoPlayerSize: $width x $height")
                     kernel.updateSurFaceSize(width, height)
                 } else {
                     kernel.updateSurFaceSize(width, height)
