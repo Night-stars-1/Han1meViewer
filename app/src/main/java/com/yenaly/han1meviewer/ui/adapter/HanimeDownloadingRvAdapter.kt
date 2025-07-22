@@ -86,12 +86,6 @@ class HanimeDownloadingRvAdapter(private val fragment: DownloadingFragment) :
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.S)
-    private val renderEffect = RenderEffect.createBlurEffect(
-        8.dpF, 8.dpF,
-        Shader.TileMode.CLAMP
-    )
-
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(
         holder: DataBindingHolder<ItemHanimeDownloadingBinding>,
@@ -118,6 +112,10 @@ class HanimeDownloadingRvAdapter(private val fragment: DownloadingFragment) :
         holder.binding.ivCoverBg.apply {
             loadUnhappily(item.coverUri, item.coverUrl)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                val renderEffect = RenderEffect.createBlurEffect(
+                    8.dpF, 8.dpF,
+                    Shader.TileMode.CLAMP
+                )
                 setRenderEffect(renderEffect)
             }
         }
