@@ -33,6 +33,11 @@ class DownloadViewModel(application: Application) : YenalyViewModel(application)
             .catch { e -> e.printStackTrace() }
             .flowOn(Dispatchers.IO)
 
+    fun loadUpdating() =
+        DatabaseRepo.HanimeDownload.loadloadUpdating()
+            .catch { e -> e.printStackTrace() }
+            .flowOn(Dispatchers.IO)
+
     fun loadAllDownloadedHanime(
         sortedBy: HanimeDownloadEntity.SortedBy = HanimeDownloadEntity.SortedBy.ID,
         ascending: Boolean = false,

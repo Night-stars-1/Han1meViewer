@@ -3,13 +3,9 @@ package com.yenaly.han1meviewer.ui.adapter
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.RenderEffect
-import android.graphics.Shader
-import android.os.Build
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.annotation.RequiresApi
 import androidx.core.view.updateLayoutParams
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator
 import androidx.recyclerview.widget.DiffUtil
@@ -17,17 +13,14 @@ import com.chad.library.adapter4.BaseDifferAdapter
 import com.chad.library.adapter4.viewholder.DataBindingHolder
 import com.google.android.material.button.MaterialButton
 import com.yenaly.han1meviewer.R
-import com.yenaly.han1meviewer.databinding.ItemHanimeDownloadingBinding
-import com.yenaly.han1meviewer.logic.entity.download.HanimeDownloadEntity
+import com.yenaly.han1meviewer.databinding.ItemHanimeUpdatingBinding
+import com.yenaly.han1meviewer.logic.entity.download.HUpdateEntity
 import com.yenaly.han1meviewer.logic.state.DownloadState
 import com.yenaly.han1meviewer.ui.fragment.home.download.DownloadingFragment
-import com.yenaly.han1meviewer.util.HImageMeower.loadUnhappily
 import com.yenaly.han1meviewer.util.addUpdateListener
-import com.yenaly.han1meviewer.util.setStateViewLayout
 import com.yenaly.han1meviewer.util.showAlertDialog
-import com.yenaly.han1meviewer.worker.HanimeDownloadManagerV2
+import com.yenaly.han1meviewer.worker.HUpdateWorker
 import com.yenaly.han1meviewer.worker.HanimeDownloadWorker
-import com.yenaly.yenaly_libs.utils.dpF
 import com.yenaly.yenaly_libs.utils.formatFileSizeV2
 import com.yenaly.yenaly_libs.utils.logFieldsChange
 import java.lang.ref.WeakReference
@@ -37,8 +30,8 @@ import java.lang.ref.WeakReference
  * @author Yenaly Liew
  * @time 2023/11/26 026 17:05
  */
-class HanimeDownloadingRvAdapter(private val fragment: DownloadingFragment) :
-    BaseDifferAdapter<HanimeDownloadEntity, DataBindingHolder<ItemHanimeDownloadingBinding>>(
+class HanimeUpdateRvAdapter(private val fragment: DownloadingFragment) :
+    BaseDifferAdapter<HUpdateEntity, DataBindingHolder<ItemHanimeUpdatingBinding>>(
         COMPARATOR
     ) {
 
@@ -47,7 +40,7 @@ class HanimeDownloadingRvAdapter(private val fragment: DownloadingFragment) :
     }
 
     companion object {
-        const val TAG = "HanimeDownloadingRvAdapter"
+        const val TAG = "HanimeUpdateRvAdapter"
 
         private val interpolator = FastOutSlowInInterpolator()
 
@@ -55,24 +48,24 @@ class HanimeDownloadingRvAdapter(private val fragment: DownloadingFragment) :
         private const val STATE = 1 shl 1
         private const val PROGRESS = 1 shl 2
 
-        val COMPARATOR = object : DiffUtil.ItemCallback<HanimeDownloadEntity>() {
+        val COMPARATOR = object : DiffUtil.ItemCallback<HUpdateEntity>() {
             override fun areContentsTheSame(
-                oldItem: HanimeDownloadEntity,
-                newItem: HanimeDownloadEntity,
+                oldItem: HUpdateEntity,
+                newItem: HUpdateEntity,
             ): Boolean {
                 return oldItem == newItem
             }
 
             override fun areItemsTheSame(
-                oldItem: HanimeDownloadEntity,
-                newItem: HanimeDownloadEntity,
+                oldItem: HUpdateEntity,
+                newItem: HUpdateEntity,
             ): Boolean {
                 return oldItem.id == newItem.id
             }
 
             override fun getChangePayload(
-                oldItem: HanimeDownloadEntity,
-                newItem: HanimeDownloadEntity,
+                oldItem: HUpdateEntity,
+                newItem: HUpdateEntity,
             ): Any {
                 logFieldsChange(TAG, oldItem, newItem)
                 var bitset = 0
@@ -89,13 +82,12 @@ class HanimeDownloadingRvAdapter(private val fragment: DownloadingFragment) :
 
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(
-        holder: DataBindingHolder<ItemHanimeDownloadingBinding>,
+        holder: DataBindingHolder<ItemHanimeUpdatingBinding>,
         position: Int,
-        item: HanimeDownloadEntity?,
+        item: HUpdateEntity?,
     ) {
         item ?: return
-        holder.binding.tvTitle.text = item.title
-        holder.binding.ivCover.loadUnhappily(item.coverUri, item.coverUrl)
+        holder.binding.tvTitle.text = item.name
         Log.d(TAG, "调用 load")
         holder.itemView.post {
             holder.binding.vCoverBg.updateLayoutParams {
@@ -110,29 +102,17 @@ class HanimeDownloadingRvAdapter(private val fragment: DownloadingFragment) :
                 width = holder.binding.clProgress.width * item.progress / 100
             }
         }
-        holder.binding.ivCoverBg.apply {
-            loadUnhappily(item.coverUri, item.coverUrl)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                val renderEffect = RenderEffect.createBlurEffect(
-                    8.dpF, 8.dpF,
-                    Shader.TileMode.CLAMP
-                )
-                setRenderEffect(renderEffect)
-            }
-        }
         holder.binding.tvDownloadedSize.text = item.downloadedLength.formatFileSizeV2()
         holder.binding.tvSize.text = item.length.formatFileSizeV2()
-        holder.binding.tvQuality.text = item.quality
-//        holder.binding.tvProgress.text = "${item.progress}%"
-//        holder.binding.pbProgress.setProgress(item.progress, true)
+
         holder.binding.btnStart.handleStartButton(item)
     }
 
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(
-        holder: DataBindingHolder<ItemHanimeDownloadingBinding>,
+        holder: DataBindingHolder<ItemHanimeUpdatingBinding>,
         position: Int,
-        item: HanimeDownloadEntity?,
+        item: HUpdateEntity?,
         payloads: List<Any>,
     ) {
         if (payloads.isEmpty() || payloads.first() == 0)
@@ -147,9 +127,6 @@ class HanimeDownloadingRvAdapter(private val fragment: DownloadingFragment) :
             holder.binding.btnStart.handleStartButton(item)
         }
         if (bitset and PROGRESS != 0) {
-//            holder.binding.tvProgress.text = "${item.progress}%"
-//            holder.binding.pbProgress.setProgress(item.progress, true)
-
             // 根据百分比，设置 vProgress 的宽度，比如 50% 就设置成 itemView 50% 的宽度
             val weakViewProgress = WeakReference(holder.binding.vProgress)
             ValueAnimator.ofInt(
@@ -158,7 +135,7 @@ class HanimeDownloadingRvAdapter(private val fragment: DownloadingFragment) :
             ).apply {
                 // must be less than HanimeDownloadWorker.RESPONSE_INTERVAL
                 duration = 300L.coerceAtMost(HanimeDownloadWorker.RESPONSE_INTERVAL)
-                interpolator = HanimeDownloadingRvAdapter.interpolator
+                interpolator = interpolator
                 addUpdateListener(fragment) {
                     weakViewProgress.get()?.updateLayoutParams {
                         width = it.animatedValue as Int
@@ -172,24 +149,19 @@ class HanimeDownloadingRvAdapter(private val fragment: DownloadingFragment) :
         context: Context,
         parent: ViewGroup,
         viewType: Int,
-    ): DataBindingHolder<ItemHanimeDownloadingBinding> {
+    ): DataBindingHolder<ItemHanimeUpdatingBinding> {
         return DataBindingHolder(
-            ItemHanimeDownloadingBinding.inflate(
+            ItemHanimeUpdatingBinding.inflate(
                 LayoutInflater.from(context), parent, false
             )
         ).also { viewHolder ->
             viewHolder.binding.btnStart.setOnClickListener {
                 val pos = viewHolder.bindingAdapterPosition
                 val item = getItem(pos) ?: return@setOnClickListener
-//                val isDownloading: Boolean
                 if (item.isDownloading) {
-//                    isDownloading = false
-//                    cancelUniqueWorkAndPause(item.copy(isDownloading = false))
-                    HanimeDownloadManagerV2.stopTask(item)
+                    HUpdateWorker.stop()
                 } else {
-//                    isDownloading = true
-//                    continueWork(item.copy(isDownloading = true))
-                    HanimeDownloadManagerV2.resumeTask(item)
+                    HUpdateWorker.resume()
                 }
                 viewHolder.binding.btnStart.handleStartButton(item, rotate = true)
             }
@@ -199,11 +171,10 @@ class HanimeDownloadingRvAdapter(private val fragment: DownloadingFragment) :
                 context.showAlertDialog {
                     setTitle(R.string.sure_to_delete)
                     setMessage(
-                        context.getString(R.string.prepare_to_delete_s, item.title)
+                        context.getString(R.string.prepare_to_delete_s, item.name)
                     )
                     setPositiveButton(R.string.confirm) { _, _ ->
-//                        cancelUniqueWorkAndDelete(item)
-                        HanimeDownloadManagerV2.deleteTask(item)
+                        HUpdateWorker.deleteUpdate(context)
                     }
                     setNegativeButton(R.string.cancel, null)
                 }
@@ -214,7 +185,7 @@ class HanimeDownloadingRvAdapter(private val fragment: DownloadingFragment) :
 
     @SuppressLint("SetTextI18n")
     private fun MaterialButton.handleStartButton(
-        item: HanimeDownloadEntity,
+        item: HUpdateEntity,
         rotate: Boolean = false
     ) {
         val state = if (rotate) {

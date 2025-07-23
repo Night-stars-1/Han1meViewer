@@ -152,9 +152,13 @@ object DatabaseRepo {
 
     object HanimeDownload {
         private val hanimeDownloadDao = DownloadDatabase.instance.hanimeDownloadDao
+        private val hanimeUpdateDao = DownloadDatabase.instance.hUpdateDao
 
         fun loadAllDownloadingHanime() =
             hanimeDownloadDao.loadAllDownloadingHanime()
+
+        fun loadloadUpdating() =
+            hanimeUpdateDao.loadUpdating()
 
         /**
          * 查询所有视频，并且每个视频要有当前他在的分类

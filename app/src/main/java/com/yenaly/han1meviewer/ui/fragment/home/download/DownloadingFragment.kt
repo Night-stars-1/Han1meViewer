@@ -1,6 +1,7 @@
 package com.yenaly.han1meviewer.ui.fragment.home.download
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
@@ -11,12 +12,14 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.yenaly.han1meviewer.R
 import com.yenaly.han1meviewer.databinding.FragmentListOnlyBinding
 import com.yenaly.han1meviewer.ui.StateLayoutMixin
 import com.yenaly.han1meviewer.ui.activity.MainActivity
 import com.yenaly.han1meviewer.ui.adapter.HanimeDownloadingRvAdapter
+import com.yenaly.han1meviewer.ui.adapter.HanimeUpdateRvAdapter
 import com.yenaly.han1meviewer.ui.fragment.IToolbarFragment
 import com.yenaly.han1meviewer.ui.viewmodel.DownloadViewModel
 import com.yenaly.han1meviewer.util.HImageMeower
@@ -28,6 +31,8 @@ import com.yenaly.yenaly_libs.base.YenalyFragment
 import com.yenaly.yenaly_libs.utils.activity
 import com.yenaly.yenaly_libs.utils.unsafeLazy
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 import java.util.UUID
 
@@ -43,7 +48,15 @@ class DownloadingFragment : YenalyFragment<FragmentListOnlyBinding>(),
 
     val viewModel by activityViewModels<DownloadViewModel>()
 
-    private val adapter by unsafeLazy { HanimeDownloadingRvAdapter(this) }
+    private val hanimeDownloadingRvAdapter by unsafeLazy { HanimeDownloadingRvAdapter(this) }
+    private val hanimeUpdatingRvAdapter by unsafeLazy { HanimeUpdateRvAdapter(this) }
+
+    private val concatAdapter by unsafeLazy {
+        ConcatAdapter(
+        hanimeDownloadingRvAdapter,
+            hanimeUpdatingRvAdapter
+        )
+    }
 
     override fun getViewBinding(
         inflater: LayoutInflater,
@@ -54,21 +67,25 @@ class DownloadingFragment : YenalyFragment<FragmentListOnlyBinding>(),
 
     override fun initData(savedInstanceState: Bundle?) {
         binding.rvList.layoutManager = LinearLayoutManager(context)
-        binding.rvList.adapter = adapter
+        binding.rvList.adapter = hanimeDownloadingRvAdapter
         ViewCompat.setOnApplyWindowInsetsListener(binding.rvList) { v, insets ->
             val navBar = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
             v.updatePadding(bottom = navBar.bottom)
             WindowInsetsCompat.CONSUMED
         }
-        adapter.setStateViewLayout(R.layout.layout_empty_view)
+        hanimeDownloadingRvAdapter.setStateViewLayout(R.layout.layout_empty_view)
         // binding.rvList.itemAnimator?.changeDuration = 0
     }
 
     override fun bindDataObservers() {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.loadAllDownloadingHanime().flowWithLifecycle(viewLifecycleOwner.lifecycle)
-                .collect {
-                    adapter.submitList(it)
+            merge(
+                viewModel.loadAllDownloadingHanime().map { it to null },
+                viewModel.loadUpdating().map { null to it }
+            ).flowWithLifecycle(viewLifecycleOwner.lifecycle)
+                .collect { (downloading, updating) ->
+                    downloading?.let { hanimeDownloadingRvAdapter.submitList(it) }
+                    updating?.let { hanimeUpdatingRvAdapter.submitList(listOf(it)) }
                 }
         }
     }
@@ -105,24 +122,24 @@ class DownloadingFragment : YenalyFragment<FragmentListOnlyBinding>(),
                 }
 
                 R.id.tb_start_all -> {
-                    adapter.items.forEachIndexed { index, entity ->
+                    hanimeDownloadingRvAdapter.items.forEachIndexed { index, entity ->
                         if (!entity.isDownloading) {
                             HanimeDownloadManagerV2.resumeTask(entity)
 //                            adapter.continueWork(entity.copy(isDownloading = true))
-                            adapter.notifyItemChanged(index)
+                            hanimeDownloadingRvAdapter.notifyItemChanged(index)
                         }
                     }
                     return@addMenu true
                 }
 
                 R.id.tb_pause_all -> {
-                    adapter.items.forEachIndexed { index, entity ->
+                    hanimeDownloadingRvAdapter.items.forEachIndexed { index, entity ->
                         if (entity.isDownloading) {
                             HanimeDownloadManagerV2.stopTask(entity)
 //                            with(adapter) {
 //                                cancelUniqueWorkAndPause(entity.copy(isDownloading = false))
 //                            }
-                            adapter.notifyItemChanged(index)
+                            hanimeDownloadingRvAdapter.notifyItemChanged(index)
                         }
                     }
                     return@addMenu true

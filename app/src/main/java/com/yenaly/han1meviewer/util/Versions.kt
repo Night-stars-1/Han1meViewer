@@ -12,10 +12,13 @@ import com.yenaly.han1meviewer.Preferences
 import com.yenaly.han1meviewer.R
 import com.yenaly.han1meviewer.logic.model.github.Latest
 import com.yenaly.han1meviewer.worker.HUpdateWorker
+import com.yenaly.yenaly_libs.utils.applicationContext
 import com.yenaly.yenaly_libs.utils.showShortToast
 import java.io.File
 
 val Context.updateFile: File get() = File(applicationContext.cacheDir, "update.apk")
+
+val UPDATE_ZIP_PATH: File get() = File(applicationContext.cacheDir, "update.zip")
 
 fun checkNeedUpdate(versionName: String): Boolean {
     val latestVersionCode = versionName.substringAfter("+", "").toIntOrNull() ?: Int.MAX_VALUE

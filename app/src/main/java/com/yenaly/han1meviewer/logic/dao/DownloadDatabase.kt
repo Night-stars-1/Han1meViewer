@@ -6,8 +6,10 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.yenaly.han1meviewer.logic.dao.download.DownloadCategoryDao
+import com.yenaly.han1meviewer.logic.dao.download.HUpdateDao
 import com.yenaly.han1meviewer.logic.dao.download.HanimeDownloadDao
 import com.yenaly.han1meviewer.logic.entity.download.DownloadCategoryEntity
+import com.yenaly.han1meviewer.logic.entity.download.HUpdateEntity
 import com.yenaly.han1meviewer.logic.entity.download.HanimeCategoryCrossRef
 import com.yenaly.han1meviewer.logic.entity.download.HanimeDownloadEntity
 import com.yenaly.han1meviewer.logic.state.DownloadState
@@ -19,13 +21,14 @@ import com.yenaly.yenaly_libs.utils.applicationContext
  * @time 2022/08/07 007 18:26
  */
 @Database(
-    entities = [HanimeDownloadEntity::class, DownloadCategoryEntity::class, HanimeCategoryCrossRef::class],
-    version = 3, exportSchema = false
+    entities = [HanimeDownloadEntity::class, DownloadCategoryEntity::class, HanimeCategoryCrossRef::class, HUpdateEntity::class],
+    version = 4, exportSchema = false
 )
 abstract class DownloadDatabase : RoomDatabase() {
 
     abstract val hanimeDownloadDao: HanimeDownloadDao
     abstract val downloadCategoryDao: DownloadCategoryDao
+    abstract val hUpdateDao: HUpdateDao
 
     companion object {
         val instance by lazy {
@@ -33,7 +36,7 @@ abstract class DownloadDatabase : RoomDatabase() {
                 applicationContext,
                 DownloadDatabase::class.java,
                 "download.db"
-            ).addMigrations(Migration1To2, Migration2To3).build()
+            ).addMigrations(Migration1To2, Migration2To3, Migration3To4).build()
         }
     }
 
@@ -87,6 +90,19 @@ abstract class DownloadDatabase : RoomDatabase() {
                     |CASE WHEN `downloadedLength` = `length` THEN ${DownloadState.Mask.FINISHED} 
                     |ELSE ${DownloadState.Mask.PAUSED} END END""".trimMargin()
             )
+        }
+    }
+
+    object Migration3To4 : Migration(3, 4) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                """CREATE TABLE IF NOT EXISTS `HUpdateEntity`(
+                    `name` TEXT NOT NULL, `url` TEXT NOT NULL,
+                    `nodeId` TEXT NOT NULL,
+                    `length` INTEGER NOT NULL, `downloadedLength` INTEGER NOT NULL, 
+                    `id` INTEGER PRIMARY KEY NOT NULL)""".trimIndent()
+            )
+            db.execSQL("""ALTER TABLE `HUpdateEntity` ADD COLUMN `state` INTEGER NOT NULL DEFAULT ${DownloadState.Mask.UNKNOWN}""")
         }
     }
 }

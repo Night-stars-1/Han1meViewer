@@ -57,6 +57,7 @@ import com.yenaly.han1meviewer.ui.adapter.HanimeVideoRvAdapter
 import com.yenaly.han1meviewer.ui.adapter.RvWrapper.Companion.wrappedWith
 import com.yenaly.han1meviewer.ui.adapter.VideoColumnTitleAdapter
 import com.yenaly.han1meviewer.ui.viewmodel.VideoViewModel
+import com.yenaly.han1meviewer.util.requestExternalStoragePermission
 import com.yenaly.han1meviewer.util.requestPostNotificationPermission
 import com.yenaly.han1meviewer.util.setDrawableTop
 import com.yenaly.han1meviewer.util.showAlertDialog
@@ -666,6 +667,9 @@ class VideoIntroductionFragment : YenalyFragment<FragmentVideoIntroductionBindin
                             browse(getHanimeVideoDownloadLink(viewModel.videoCode))
                         } else {
                             checkedQuality = key
+                            lifecycleScope.launch {
+                                context.requestExternalStoragePermission()
+                            }
                             viewModel.findDownloadedHanime(viewModel.videoCode)
                         }
                     }.show()

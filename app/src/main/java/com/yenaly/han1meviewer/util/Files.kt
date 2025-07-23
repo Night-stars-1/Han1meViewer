@@ -108,12 +108,14 @@ fun Context.openDownloadedHanimeVideoInActivity(videoCode: String) {
 suspend fun InputStream.copyTo(
     out: OutputStream,
     contentLength: Long,
+    startOffset: Long = 0,
     bufferSize: Int = DEFAULT_BUFFER_SIZE,
     progress: (suspend (Int) -> Unit)? = null,
+    downloadLength: (suspend (Long) -> Unit)? = null,
 ): Long {
     return withContext(Dispatchers.IO) {
         this@copyTo.use {
-            var bytesCopied: Long = 0
+            var bytesCopied: Long = startOffset
             val buffer = ByteArray(bufferSize)
             var bytes = read(buffer)
             var percent = 0
@@ -121,6 +123,7 @@ suspend fun InputStream.copyTo(
                 ensureActive()
                 out.write(buffer, 0, bytes)
                 bytesCopied += bytes
+                downloadLength?.invoke(bytesCopied)
                 val newPercent = (bytesCopied * 100 / contentLength).toInt()
                 if (newPercent != percent) {
                     percent = newPercent
