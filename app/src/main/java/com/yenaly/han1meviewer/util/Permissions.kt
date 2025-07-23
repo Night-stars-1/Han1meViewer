@@ -5,15 +5,18 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.os.Environment
 import android.provider.Settings
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.core.app.ActivityCompat.startActivityForResult
 import com.yenaly.han1meviewer.R
 import com.yenaly.yenaly_libs.utils.awaitActivityResult
 import com.yenaly.yenaly_libs.utils.requestPermission
 import com.yenaly.yenaly_libs.utils.requireComponentActivity
 import com.yenaly.yenaly_libs.utils.showShortToast
+import androidx.core.net.toUri
 
 
 /**
@@ -68,7 +71,7 @@ suspend fun Context.requestInstallPermission(): Boolean {
                 ActivityResultContracts.StartActivityForResult(),
                 Intent(
                     Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
-                    Uri.parse("package:$packageName"),
+                    "package:$packageName".toUri(),
                 ),
             )
             requestPermission(Manifest.permission.REQUEST_INSTALL_PACKAGES)
@@ -87,4 +90,40 @@ private suspend fun Context.showInstallPermissionDialog(): Int {
         setMessage(R.string.reason_for_allow_install_from_unknown_app_sources)
     }
     return dialog.await(getString(R.string.go_to_settings), getString(R.string.deny))
+}
+
+
+/**
+ * 显示存储权限对话框
+ */
+private suspend fun Context.showExternalStoragePermissionDialog(): Int {
+    val dialog = requireComponentActivity().createAlertDialog {
+        setTitle(R.string.allow_external_storage)
+        setMessage(R.string.reason_for_allow_external_storage)
+    }
+    return dialog.await(getString(R.string.go_to_settings), getString(R.string.deny))
+}
+
+/**
+ * 请求存储权限
+ */
+suspend fun Context.requestExternalStoragePermission(): Boolean {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        if (Environment.isExternalStorageManager()) return true
+        val granted = requestPermission(Manifest.permission.MANAGE_EXTERNAL_STORAGE)
+        if (!granted) {
+            val res = showExternalStoragePermissionDialog()
+            if (res == AlertDialog.BUTTON_NEGATIVE) return false
+            awaitActivityResult(
+                ActivityResultContracts.StartActivityForResult(),
+                Intent(
+                    Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
+                    "package:$packageName".toUri(),
+                ),
+            )
+            requestPermission(Manifest.permission.MANAGE_EXTERNAL_STORAGE)
+        }
+        return Environment.isExternalStorageManager()
+    }
+    return true
 }

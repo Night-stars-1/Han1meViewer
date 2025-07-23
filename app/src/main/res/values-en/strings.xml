@@ -369,5 +369,7 @@ Recommendations are as follows:\n
     <string name="use_ping_test_summary">Whether to measure the speed of the built-in HOST when the application starts, and choose the fastest one.</string>
     <string name="external_playback">External Playback</string>
     <string name="use_private_directory">Private Directory</string>
+    <string name="allow_external_storage">Allow external storage permissions</string>
+    <string name="reason_for_allow_external_storage">Don\'t worry, this is just for downloading videos normally. If you refuse permission, the download may fail. \nIf you are not at ease, you can open the private directory in the download settings.</string>
 
 </resources>

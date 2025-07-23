@@ -375,5 +375,7 @@
     <string name="use_ping_test_summary">是否在应用启动时对内置HOST进行测速，选择速度最快的。</string>
     <string name="external_playback">外部观看</string>
     <string name="use_private_directory">使用私有目录</string>
+    <string name="allow_external_storage">允许外部存储权限</string>
+    <string name="reason_for_allow_external_storage">不用担心，这只是为了正常下载视频，拒绝权限可能会下载失败 \n如果不放心可以在下载设置里打开私有目录</string>
 
 </resources>
