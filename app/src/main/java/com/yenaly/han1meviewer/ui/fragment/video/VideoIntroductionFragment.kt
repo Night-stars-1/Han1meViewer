@@ -35,6 +35,7 @@ import com.yenaly.han1meviewer.HAdvancedSearch
 import com.yenaly.han1meviewer.HCacheManager
 import com.yenaly.han1meviewer.HanimeResolution
 import com.yenaly.han1meviewer.LOCAL_DATE_FORMAT
+import com.yenaly.han1meviewer.Preferences
 import com.yenaly.han1meviewer.Preferences.isAlreadyLogin
 import com.yenaly.han1meviewer.R
 import com.yenaly.han1meviewer.VIDEO_LAYOUT_MATCH_PARENT
@@ -668,7 +669,9 @@ class VideoIntroductionFragment : YenalyFragment<FragmentVideoIntroductionBindin
                         } else {
                             checkedQuality = key
                             lifecycleScope.launch {
-                                context.requestExternalStoragePermission()
+                                if (!Preferences.isPrivateDirectory) {
+                                    context.requestExternalStoragePermission()
+                                }
                             }
                             viewModel.findDownloadedHanime(viewModel.videoCode)
                         }
